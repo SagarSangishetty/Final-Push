@@ -1,0 +1,25 @@
+git --version -- To check version..
+
+Git config/settings commands 
+
+git config --show-origin user.email 🧪 Find where a setting is coming from
+
+---------Global (For 1 user & all repo in system)
+
+git config --global --list   👉 Show all Git settings saved for user on this machine
+git config --global --user.email  👉 Show my globally configured email
+git config --global --user.name 👉 Show my globally configured name
+
+git config --global --unset --user.email 👉 Remove the global email setting
+
+---------For System (all user , all repo)
+
+git config --system
+
+---------For local (1 user 1 particular repo)
+
+git config OR git config --local
+
+
+
+
