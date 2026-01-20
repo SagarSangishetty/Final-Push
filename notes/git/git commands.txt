@@ -20,6 +20,31 @@ git config --system
 
 git config OR git config --local
 
+-----------------------------------------------------------------------------------------------------------
+
+git status -- shows what Git is tracking, what changed, and what will be committed next.
+
+git add -- Moves selected changes to the staging area
+
+git commit -m "message" -- Saves staged changes as a new version
+
+git log -- view commit history (Commit ID (hash), Author name & email Date & time Commit message)
+
+git diff -- see what exactly changed
+
+git show -- see what changed in one commit
+
+git show <commit-id>:file.txt -- Show changes of a file in a commit
+
+git checkout -- Moves you to a different branch or restores files to a previous state
+
+git checkout branch-name -- Switch branches
+
+git checkout -- file.txt -- Restore a file (discard changes)
+
+git checkout <commit-id> -- filename -- Restores a file (or files) from a specific commit into your current branch
+
+
 
 
 
