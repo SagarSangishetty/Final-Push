@@ -30,6 +30,16 @@ git commit -m "message" -- Saves staged changes as a new version
 
 git log -- view commit history (Commit ID (hash), Author name & email Date & time Commit message)
 
+git log -p -2 -- Shows the last 2 commits along with the exact code changes (patch/diff).
+
+git log --stat -- summary of changes.
+
+git log --pretty=one-line -- shows log in one-line
+
+git log -S -- (usage git log -S "search_text") Searches commit history to find when a specific text was added or removed.
+
+git log --author="sagarshetty" -- specific user logs.
+
 git diff -- see what exactly changed
 
 git show -- see what changed in one commit
@@ -44,7 +54,18 @@ git checkout -- file.txt -- Restore a file (discard changes)
 
 git checkout <commit-id> -- filename -- Restores a file (or files) from a specific commit into your current branch
 
+git restore -- Restores files to a previous state (undo changes safely) / Discard unstaged changes (most common)
 
+git restore file.txt/. (. meaning all files)
 
+git restore --staged file.txt -- Unstage a file (remove from staging area)
 
+git reset --soft <commit-id> -- undo commit but keep changes ready to commit
 
+git reset --hard <commit-id> -- completely go back and delete changes.
+ 
+git remote add origin "git hub url" -- Links your local Git repository to a remote GitHub repository.
+
+git branch -m new-branch-name -- Rename the branch I am currently on.
+
+git remote -v -- tells where my code is pushed to and fetched from
