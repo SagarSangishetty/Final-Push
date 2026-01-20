@@ -1,4 +1,4 @@
-git --version -- To check version..
+git --version --- To check version..
 
 Git config/settings commands 
 
@@ -22,50 +22,50 @@ git config OR git config --local
 
 -----------------------------------------------------------------------------------------------------------
 
-git status -- shows what Git is tracking, what changed, and what will be committed next.
+git status --- shows what Git is tracking, what changed, and what will be committed next.
 
-git add -- Moves selected changes to the staging area
+git add --- Moves selected changes to the staging area
 
-git commit -m "message" -- Saves staged changes as a new version
+git commit -m "message" --- Saves staged changes as a new version
 
-git log -- view commit history (Commit ID (hash), Author name & email Date & time Commit message)
+git log --- view commit history (Commit ID (hash), Author name & email Date & time Commit message)
 
-git log -p -2 -- Shows the last 2 commits along with the exact code changes (patch/diff).
+git log -p -2 --- Shows the last 2 commits along with the exact code changes (patch/diff).
 
-git log --stat -- summary of changes.
+git log --stat --- summary of changes.
 
-git log --pretty=one-line -- shows log in one-line
+git log --pretty=one-line --- shows log in one-line
 
-git log -S -- (usage git log -S "search_text") Searches commit history to find when a specific text was added or removed.
+git log -S --- (usage git log -S "search_text") Searches commit history to find when a specific text was added or removed.
 
-git log --author="sagarshetty" -- specific user logs.
+git log --author="sagarshetty" --- specific user logs.
 
-git diff -- see what exactly changed
+git diff --- see what exactly changed
 
-git show -- see what changed in one commit
+git show --- see what changed in one commit
 
-git show <commit-id>:file.txt -- Show changes of a file in a commit
+git show <commit-id>:file.txt --- Show changes of a file in a commit
 
-git checkout -- Moves you to a different branch or restores files to a previous state
+git checkout --- Moves you to a different branch or restores files to a previous state
 
-git checkout branch-name -- Switch branches
+git checkout branch-name --- Switch branches
 
-git checkout -- file.txt -- Restore a file (discard changes)
+git checkout -- file.txt --- Restore a file (discard changes)
 
-git checkout <commit-id> -- filename -- Restores a file (or files) from a specific commit into your current branch
+git checkout <commit-id> -- filename --- Restores a file (or files) from a specific commit into your current branch
 
-git restore -- Restores files to a previous state (undo changes safely) / Discard unstaged changes (most common)
+git restore --- Restores files to a previous state (undo changes safely) / Discard unstaged changes (most common)
 
 git restore file.txt/. (. meaning all files)
 
-git restore --staged file.txt -- Unstage a file (remove from staging area)
+git restore --staged file.txt --- Unstage a file (remove from staging area)
 
-git reset --soft <commit-id> -- undo commit but keep changes ready to commit
+git reset --soft <commit-id> --- undo commit but keep changes ready to commit
 
-git reset --hard <commit-id> -- completely go back and delete changes.
+git reset --hard <commit-id> --- completely go back and delete changes.
  
-git remote add origin "git hub url" -- Links your local Git repository to a remote GitHub repository.
+git remote add origin "git hub url" --- Links your local Git repository to a remote GitHub repository.
 
-git branch -m new-branch-name -- Rename the branch I am currently on.
+git branch -m new-branch-name --- Rename the branch I am currently on.
 
-git remote -v -- tells where my code is pushed to and fetched from
+git remote -v --- tells where my code is pushed to and fetched from
