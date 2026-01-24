@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Git Commands & Basics</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 0;
+      line-height: 1.7;
+    }
+
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .section {
+      background: white;
+      padding: 18px 22px;
+      margin: 18px 0;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      color: #1d4ed8;
+      border-left: 5px solid #2563eb;
+      padding-left: 10px;
+    }
+
+    .cmd {
+      margin: 10px 0;
+      padding: 8px;
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+
+    code {
+      font-weight: bold;
+      color: #111827;
+    }
+
+    /* Navigation Buttons */
+    .nav-buttons {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .nav-buttons a button {
+      padding: 10px 18px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+    }
+
+    .nav-buttons a button:hover {
+      opacity: 0.85;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      color: gray;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>📘 Page 1: Git Commands & Basics</h1>
+  <p>Important Git Notes (Commands + Config + Logs)</p>
+</header>
+
+<div class="container">
+
+  <!-- Git Version -->
+  <div class="section">
+    <h2>✅ Git Version</h2>
+    <div class="cmd"><code>git --version</code> — To check Git version</div>
+  </div>
+
+  <!-- Git Config -->
+  <div class="section">
+    <h2>⚙ Git Config / Settings Commands</h2>
+
+    <div class="cmd">
+      <code>git config --show-origin user.email</code> — Find where a setting is coming from
+    </div>
+
+    <h3>Global (1 user & all repos)</h3>
+    <div class="cmd"><code>git config --global --list</code> — Show all settings saved for user</div>
+    <div class="cmd"><code>git config --global --user.email</code> — Show globally configured email</div>
+    <div class="cmd"><code>git config --global --user.name</code> — Show globally configured name</div>
+    <div class="cmd"><code>git config --global --unset --user.email</code> — Remove wrong global email</div>
+
+    <h3>System Level (all users, all repos)</h3>
+    <div class="cmd"><code>git config --system</code></div>
+
+    <h3>Local Level (one repo only)</h3>
+    <div class="cmd"><code>git config</code> or <code>git config --local</code></div>
+  </div>
+
+  <!-- Basic Commands -->
+  <div class="section">
+    <h2>📌 Basic Git Workflow Commands</h2>
+
+    <div class="cmd"><code>git status</code> — Shows tracking, changes, and commit readiness</div>
+    <div class="cmd"><code>git add</code> — Moves selected changes to staging area</div>
+    <div class="cmd"><code>git commit -m "message"</code> — Saves staged changes as a new version</div>
+  </div>
+
+  <!-- Git Log -->
+  <div class="section">
+    <h2>📜 Git Log Commands</h2>
+
+    <div class="cmd"><code>git log</code> — View commit history (hash, author, date, message)</div>
+    <div class="cmd"><code>git log -p -2</code> — Shows last 2 commits with patch/diff</div>
+    <div class="cmd"><code>git log --stat</code> — Summary of changes</div>
+    <div class="cmd"><code>git log --pretty=one-line</code> — One line log format</div>
+    <div class="cmd"><code>git log -S "search_text"</code> — Search commits where text was added/removed</div>
+    <div class="cmd"><code>git log --author="sagarshetty"</code> — Logs of a specific author</div>
+  </div>
+
+  <!-- Diff & Show -->
+  <div class="section">
+    <h2>🔍 Diff & Commit Inspection</h2>
+
+    <div class="cmd"><code>git diff</code> — See what exactly changed</div>
+    <div class="cmd"><code>git show</code> — See changes in one commit</div>
+    <div class="cmd"><code>git show &lt;commit-id&gt;:file.txt</code> — Show file changes from a commit</div>
+  </div>
+
+  <!-- Checkout -->
+  <div class="section">
+    <h2>🌿 Checkout Commands</h2>
+
+    <div class="cmd"><code>git checkout</code> — Switch branches or restore files</div>
+    <div class="cmd"><code>git checkout branch-name</code> — Switch branches</div>
+    <div class="cmd"><code>git checkout -- file.txt</code> — Restore file (discard changes)</div>
+    <div class="cmd"><code>git checkout &lt;commit-id&gt; -- filename</code> — Restore file from commit</div>
+  </div>
+
+  <!-- Restore -->
+  <div class="section">
+    <h2>♻ Git Restore Commands</h2>
+
+    <div class="cmd"><code>git restore</code> — Undo changes safely</div>
+    <div class class="cmd"><code>git restore .</code> — Restore all files</div>
+    <div class="cmd"><code>git restore --staged file.txt</code> — Unstage file</div>
+  </div>
+
+  <!-- Reset -->
+  <div class="section">
+    <h2>⏪ Git Reset Commands</h2>
+
+    <div class="cmd"><code>git reset --soft &lt;commit-id&gt;</code> — Undo commit, keep changes staged</div>
+    <div class="cmd"><code>git reset --hard &lt;commit-id&gt;</code> — Remove commit and delete changes</div>
+  </div>
+
+  <!-- Remote -->
+  <div class="section">
+    <h2>🌍 Remote Repository Commands</h2>
+
+    <div class="cmd"><code>git remote add origin "github-url"</code> — Link local repo to GitHub</div>
+    <div class="cmd"><code>git remote -v</code> — Show push/fetch remote URLs</div>
+    <div class="cmd"><code>git pull</code> — Bring remote changes into local branch</div>
+    <div class="cmd"><code>git clone &lt;repo-url&gt;</code> — Clone remote repo locally</div>
+  </div>
+
+  <!-- Branch Rename -->
+  <div class="section">
+    <h2>🔀 Branch Rename</h2>
+    <div class="cmd"><code>git branch -m new-branch-name</code> — Rename current branch</div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a href="index.html"><button>⬅ Home</button></a>
+    <a href="page2_git_branching.html"><button>Next ➝</button></a>
+  </div>
+
+</div>
+
+<footer>
+  ✅ Page 1 Complete | Git Notes Book | By Sagar Shetty
+</footer>
+
+</body>
+</html>
