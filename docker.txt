@@ -1,0 +1,7 @@
+systemctl start docker.service --- to start the docker service in Linux
+
+systemctl status docker.service --- to check docker status
+
+docker ps --- to check docker process
+
+
