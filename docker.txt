@@ -2,15 +2,27 @@ systemctl start docker.service --- to start the docker service in Linux
 
 systemctl status docker.service --- to check docker status
 
-docker ps --- to check docker process/container
+docker build . --- to build docker image
 
-docker build <docker file> --- to build docker image
+docker build -t "tagname". --- to build docker image with name
 
 docker image ls --- to check the image details
 
+docker rmi <image id> --- to delete image
+
 docker run <image id> --- to run the image 
 
-docker run -d -p 3000:3000 <image id> --- to run the docker image in detach mode and expose port 3000 outside.
+docker ps --- to check only running container.
+
+docker ps -a --- shows all containers.
+
+docker rm <container name> --- to remove container
+
+docker run -d -p 3000:3000 <image id> --- to run the docker image on container in detach mode and expose port 3000 outside.
+
+docker run -d --rm -p 3000:3000 <image id> --- rm here is to delete a container once it is stopped.
+
+docker run -d --rm --name "container name" -p 3000:3000 <image id> --- name here is container name.
 
 docker stop <container-id> -- to stop container
 
