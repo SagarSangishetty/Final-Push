@@ -2,15 +2,21 @@ systemctl start docker.service --- to start the docker service in Linux
 
 systemctl status docker.service --- to check docker status
 
+**************Images************
+
 docker build . --- to build docker image
 
 docker build -t "tagname". --- to build docker image with name
 
 docker image ls --- to check the image details
 
+docker tag <old image name> <new image name> --- To rename the image 
+
 docker rmi <image id> --- to delete image
 
 docker run <image id> --- to run the image 
+
+***************Container**********
 
 docker ps --- to check only running container.
 
@@ -24,8 +30,28 @@ docker run -d --rm -p 3000:3000 <image id> --- rm here is to delete a container 
 
 docker run -d --rm --name "container name" -p 3000:3000 <image id> --- name here is container name.
 
+docker run -it <image id> --- to run the docker container in interactive mode.
+
 docker stop <container-id> -- to stop container
 
+docker login --- to login into docker hub
 
+****************docker hub*************
 
+docker push <image name> --- Uploads a local Docker image to a remote registry (usually Docker Hub).
 
+docker pull <image name> --- Downloads an image from a remote registry to your local system.
+
+***********docker volume***************
+
+docker volume create mydata --- Create a Docker volume
+
+docker volume ls --- check volume
+
+docker volume inspect --- details
+
+docker volume rm --- delete volume
+
+docker volume prune --- remove unused volumes
+
+docker run -d -v <volume>:<path inside volume> <image> --- volume with container
