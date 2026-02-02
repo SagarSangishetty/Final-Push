@@ -34,7 +34,11 @@ docker run -it <image id> --- to run the docker container in interactive mode.
 
 docker stop <container-id> -- to stop container
 
+docker start <container-id> -- to start the container
+
 docker login --- to login into docker hub
+
+docker exec -it <container-id> sh  --- to run get inside container
 
 ****************docker hub*************
 

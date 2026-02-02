@@ -1,0 +1,36 @@
+# Use specific base image versions
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files first (better caching)
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --production
+
+# Copy application code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Use non-root user (security)
+USER node
+
+# Define startup command
+CMD ["node", "app.js"]
+
+
+Key Instructions:
+
+FROM - Base image
+WORKDIR - Set working directory
+COPY / ADD - Copy files into image
+RUN - Execute commands during build
+CMD - Default command when container starts
+ENTRYPOINT - Configure container as executable
+ENV - Set environment variables
+EXPOSE - Document which ports to use
+VOLUME - Create mount point
