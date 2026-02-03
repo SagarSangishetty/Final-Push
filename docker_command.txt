@@ -54,8 +54,20 @@ docker volume ls --- check volume
 
 docker volume inspect --- details
 
-docker volume rm --- delete volume
+docker volume rm <volume name> --- delete volume
 
 docker volume prune --- remove unused volumes
 
 docker run -d -v <volume>:<path inside volume> <image> --- volume with container
+
+-- Bind Mount  --
+
+docker run -v C:\Users\Sagar\myapp:/app nginx --- on windows 
+
+docker run -v /home/user/myapp:/app nginx --- on Linux
+
+docker run -d -p 8080:80 -v ${PWD}:/usr/share/nginx/html --name my-website nginx --- example of local html website hosting on docker 
+
+---tmpfs volume----
+
+docker run --mount type=tmpfs,target=/path/in/container alpine
