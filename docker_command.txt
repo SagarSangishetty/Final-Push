@@ -71,3 +71,19 @@ docker run -d -p 8080:80 -v ${PWD}:/usr/share/nginx/html --name my-website nginx
 ---tmpfs volume----
 
 docker run --mount type=tmpfs,target=/path/in/container alpine
+
+**************Docker Network***************
+
+docker network ls --- List networks
+
+docker network create mynetwork ---  Create network
+
+docker network inspect mynetwork --- Inspect network (see connected containers)
+
+docker network connect mynetwork container-name --- Connect running container to network
+
+docker network disconnect mynetwork container-name  --- Disconnect container from network
+
+docker network rm mynetwork --- Remove network
+
+docker network prune --- Remove all unused networks

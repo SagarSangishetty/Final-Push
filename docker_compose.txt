@@ -1,0 +1,53 @@
+# START SERVICES
+docker-compose up                    # Start (foreground)
+docker-compose up -d                 # Start (background/detached)
+docker-compose up --build            # Rebuild and start
+docker-compose up -d service-name    # Start specific service
+
+# STOP SERVICES
+docker-compose stop                  # Stop (keeps containers)
+docker-compose down                  # Stop and remove containers
+docker-compose down -v               # Stop, remove containers & volumes
+docker-compose down --rmi all        # Stop, remove everything including images
+
+# STATUS & LOGS
+docker-compose ps                    # List running services
+docker-compose logs                  # View all logs
+docker-compose logs -f               # Follow logs (live)
+docker-compose logs service-name     # Logs for specific service
+docker-compose logs -f --tail=100    # Last 100 lines, live
+
+# EXECUTE COMMANDS
+docker-compose exec service-name sh  # Enter container shell
+docker-compose exec db psql -U user  # Run command in container
+docker-compose run service-name cmd  # Run one-off command
+
+# BUILD & MANAGE
+docker-compose build                 # Build/rebuild images
+docker-compose build --no-cache      # Build without cache
+docker-compose pull                  # Pull latest images
+docker-compose restart               # Restart services
+docker-compose restart service-name  # Restart specific service
+
+# SCALE SERVICES
+docker-compose up -d --scale web=3   # Run 3 instances of 'web'
+
+# VALIDATE & CONFIG
+docker-compose config                # Validate and view config
+docker-compose config --services     # List services
+
+
+
+version: '3.8'  # Compose file version
+
+services:       # Define containers
+  service1:
+    # Configuration
+  service2:
+    # Configuration
+
+networks:       # Optional: Custom networks
+  mynetwork:
+
+volumes:        # Optional: Named volumes
+  myvolume:
