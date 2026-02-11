@@ -1,0 +1,22 @@
+#Simple react application deploying on 3 seprate containers
+#Using pre build image & bulding image in docker compose and running container.
+
+version: "3.9"
+
+services:
+
+  first-container:
+    build: .
+    image: reactapp:OG
+    ports:
+      - "8080:3000"
+
+  second-container:
+    image: reactapp:v1
+    ports:
+      - "8081:3000"
+
+  third-container:
+    image: reactapp:v2
+    ports:
+      - "8082:3000"
