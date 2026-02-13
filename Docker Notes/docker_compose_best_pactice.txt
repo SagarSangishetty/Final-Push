@@ -1,0 +1,205 @@
+DOCKER COMPOSE BEST PRACTICES
+============================
+
+1. Use Specific Image Versions
+------------------------------
+Avoid:
+image: nginx:latest
+
+Use:
+image: nginx:1.25
+
+Reason:
+Prevents unexpected failures due to version changes.
+
+
+2. Use Environment Variables (.env file)
+----------------------------------------
+Create .env file:
+
+DB_USER=admin
+DB_PASSWORD=secret
+
+docker-compose.yml:
+
+environment:
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+
+Reason:
+Security + flexibility.
+
+
+3. Use Named Volumes for Persistent Data
+----------------------------------------
+Example:
+
+services:
+  db:
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+
+Reason:
+Avoids data loss when containers restart.
+
+
+4. Add Restart Policies
+-----------------------
+Example:
+
+restart: unless-stopped
+
+Options:
+always
+on-failure
+unless-stopped
+
+Reason:
+Auto recovery in production.
+
+
+5. Limit Exposed Ports
+----------------------
+Expose only reverse proxy:
+
+Good:
+nginx -> exposed
+backend/db -> internal only
+
+Reason:
+Security best practice.
+
+
+6. Use Docker Networks
+----------------------
+Example:
+
+networks:
+  app_net:
+
+services:
+  backend:
+    networks:
+      - app_net
+
+Reason:
+Better service communication & isolation.
+
+
+7. Health Checks
+----------------
+Example:
+
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8000"]
+  interval: 30s
+  retries: 3
+
+Reason:
+Detect container failures.
+
+
+8. Use .dockerignore
+--------------------
+Example:
+
+node_modules
+.git
+logs
+tmp
+
+Reason:
+Faster builds + smaller images.
+
+
+9. Separate Services Properly
+-----------------------------
+One container = one service.
+
+Avoid:
+Backend + DB in same container.
+
+Reason:
+Scalability & maintainability.
+
+
+10. Logging Configuration
+-------------------------
+Example:
+
+logging:
+  driver: json-file
+  options:
+    max-size: "10m"
+
+Reason:
+Prevent disk overflow.
+
+
+11. Use Build Context Carefully
+-------------------------------
+Example:
+
+build:
+  context: ./backend
+
+Reason:
+Avoid copying unnecessary files.
+
+
+12. Organize Project Structure
+------------------------------
+
+project/
+├── docker-compose.yml
+├── backend/
+├── frontend/
+├── nginx/
+└── .env
+
+Reason:
+Cleaner project management.
+
+
+13. Avoid Hardcoding Secrets
+----------------------------
+Never store passwords directly in compose file.
+
+Use:
+.env
+Secret manager
+Vault (production).
+
+
+14. Use Profiles for Environments (Advanced)
+--------------------------------------------
+Example:
+
+profiles:
+  - dev
+  - prod
+
+Run:
+
+docker compose --profile dev up
+
+Reason:
+Multiple environment configs.
+
+
+15. Validate Compose File
+-------------------------
+Before running:
+
+docker compose config
+
+Reason:
+Detect syntax errors early.
+
+
+============================
+END OF DOCKER COMPOSE NOTES
+============================

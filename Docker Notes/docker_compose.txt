@@ -51,3 +51,9 @@ networks:       # Optional: Custom networks
 
 volumes:        # Optional: Named volumes
   myvolume:
+
+
+Python	              CMD ["python", "app.py"]
+JavaScript (Node)     CMD ["node", "app.js"]
+Java	              CMD ["java", "-jar", "app.jar"]
+HTML	              CMD ["nginx", "-g", "daemon off;"]
