@@ -1,0 +1,29 @@
+# CLUSTER MANAGEMENT
+minikube start              # Start the cluster
+minikube stop               # Stop the cluster
+minikube delete             # Delete the cluster completely
+minikube pause              # Pause the cluster (saves resources)
+minikube unpause            # Resume paused cluster
+minikube status             # Check cluster status
+
+# INFORMATION
+minikube version            # Check minikube version
+minikube ip                 # Get IP address of the cluster
+minikube logs               # View minikube logs for debugging
+minikube config view        # View current configuration
+
+# DASHBOARD
+minikube dashboard          # Opens Kubernetes dashboard in browser (Visual UI)
+
+# ADDONS
+minikube addons list        # List all available addons
+minikube addons enable metrics-server   # Enable an addon
+minikube addons disable metrics-server  # Disable an addon
+
+# SSH INTO NODE
+minikube ssh                # SSH into the minikube node directly
+
+# RESOURCE CONFIGURATION
+minikube start --cpus 4 --memory 8192   # Start with custom CPU & memory
+minikube start --driver=docker           # Start using docker as driver
+
