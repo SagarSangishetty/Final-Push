@@ -53,6 +53,13 @@ kubectl rollout status deployment <deployment name>                           #W
 
 kubectl rollout undo deployment <deployment name>			      #Rollback if something breaks
 
+kubectl scale deployment <deployment name> --replicas=4			      #Scales the deployment to run 4 identical pods
+
+kubectl scale deployment my-k8s-app --replicas=1                              # Scale down to 1 pod
+
+kubectl scale deployment my-k8s-app --replicas=0                              # Stop all pods (keeps deployment)
+
+
 
 
 
