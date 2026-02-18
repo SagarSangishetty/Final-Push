@@ -1,3 +1,5 @@
+*************Manage the cluster**************
+
 # CLUSTER MANAGEMENT
 minikube start              # Start the cluster
 minikube stop               # Stop the cluster
@@ -15,15 +17,43 @@ minikube config view        # View current configuration
 # DASHBOARD
 minikube dashboard          # Opens Kubernetes dashboard in browser (Visual UI)
 
-# ADDONS
-minikube addons list        # List all available addons
-minikube addons enable metrics-server   # Enable an addon
-minikube addons disable metrics-server  # Disable an addon
-
 # SSH INTO NODE
 minikube ssh                # SSH into the minikube node directly
 
 # RESOURCE CONFIGURATION
+
 minikube start --cpus 4 --memory 8192   # Start with custom CPU & memory
 minikube start --driver=docker           # Start using docker as driver
+
+minikube service my-first-k8s-app                                             #Opens the deployed app in the browser using Minikube
+
+**********Manage things inside the cluster************
+
+kubectl create deployment my-first-k8s-app --image=nginx:latest               #Creates a deployment running an nginx container
+
+kubectl get deployment                                                        #Shows the status of the deployment
+
+kubectl get pods                                                              #Displays running pods created by the deployment
+
+kubectl get service 							      #Shows all Kubernetes services and their access details
+
+kubectl expose deployment my-first-k8s-app --port=80 --type=LoadBalancer      #Creates a service to expose the app externally
+
+kubectl delete deployment <name of deployment>                                #To delete deployment
+
+kubectl logs <pod name>                                                       #To fetch pod logs
+
+kubectl describe pod <pod name>                                               #Describe a specific pod  
+
+kubectl describe pods                                                         #Describe all pods
+
+kubectl set image deployment <deployment_name> <container_name>=shettysagar272/k8s:02             #Updates the container image in a deployment to new version
+
+kubectl rollout status deployment <deployment name>                           #Watch rollout progress
+
+kubectl rollout undo deployment <deployment name>			      #Rollback if something breaks
+
+
+
+
 
