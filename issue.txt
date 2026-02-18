@@ -1,0 +1,3 @@
+issue -- port forwarding issue target port and service port.
+
+So your container port is the target port and your service port is the port which listen to outside.
