@@ -65,7 +65,7 @@ kubectl apply -f deployment.yaml -f service.yaml                              # 
 
 kubectl delete -f <filename> -f 					      # Delete resources from single file
 
-kubectl apply -f deployment.yaml -f service.yaml                              # Delete resources from Multiple file
+kubectl apply -f deployment.yaml -f service.yaml                              # Delete resources from Multiple file	
 
 
 
