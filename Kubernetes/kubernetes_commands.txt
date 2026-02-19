@@ -59,6 +59,17 @@ kubectl scale deployment my-k8s-app --replicas=1                              # 
 
 kubectl scale deployment my-k8s-app --replicas=0                              # Stop all pods (keeps deployment)
 
+kubectl apply -f <filename>						      # Creates or updates Kubernetes resources defined in the YAML/JSON file
+
+kubectl apply -f deployment.yaml -f service.yaml                              # Apply multiple files
+
+kubectl delete -f <filename> -f 					      # Delete resources from single file
+
+kubectl apply -f deployment.yaml -f service.yaml                              # Delete resources from Multiple file
+
+
+
+
 
 
 
