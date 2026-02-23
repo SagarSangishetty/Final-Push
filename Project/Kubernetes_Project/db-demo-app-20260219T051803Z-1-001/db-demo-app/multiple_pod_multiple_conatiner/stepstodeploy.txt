@@ -1,0 +1,15 @@
+Steps:
+
+Changes in node project (dynamic host and port for database URL)
+
+Building image & pushing image with 03 version
+
+YAML config requirement explanation
+
+First create depl and service config for MONGO APP so we will be having service name
+
+Now create depl and service config for NODE APP and explain how to use env variables in config
+
+Now we will create configMAP file
+
+Run node-app deployment
