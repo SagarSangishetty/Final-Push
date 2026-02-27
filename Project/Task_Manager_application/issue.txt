@@ -1,0 +1,33 @@
+Build failed because i was running npm install before copying package.jason 
+Solution copy package befor installing npm modules
+# Copy package files FIRST
+COPY package.json ./
+RUN npm install
+
+-----------
+
+
+ECONNREFUSED 172.20.0.2:5433
+👉 Your Node app is trying to connect to PostgreSQL on:
+Port 5433 inside container ❌
+
+But PostgreSQL container listens on:
+5432 inside container ✔
+
+Key Docker Networking Rule
+
+When containers talk to each other:
+
+👉 Use container port (5432)
+👉 NOT host mapped port (5433)
+
+Host: 5433 → Container: 5432
+
+Solution : ✅ Fix Your .env DB_PORT=5432 ✔
+
+-----------------
+
+
+Api (backend) was not defined in environment variable file after defining same is working now 
+
+For mult tier application usage of ingress is the best approach as we don't expose backend externally

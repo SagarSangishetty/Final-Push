@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image: shettysagar272/task-manager-appl:Backend01
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: task-manager-config-map
+              key: DB_HOST
+
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: task-manager-config-map
+              key: DB_PORT
+
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: task-manager-config-map
+              key: DB_NAME
+
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: task-manager-config-map
+              key: DB_USER
+
+        - name: PORT
+          valueFrom: 
+            configMapKeyRef: 
+              name: task-manager-config-map
+              key: PORT
+        
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: task-manager-secret
+              key: DB_PASSWORD
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+  - name: http
+    port: 4000           # Service port inside cluster
+    targetPort: 4000     # Container port
