@@ -32,6 +32,8 @@ docker run -d --rm --name "container name" -p 3000:3000 <image id> --- name here
 
 docker run -it <image id> --- to run the docker container in interactive mode.
 
+docker run --env-file .env -p 3000:3000 your-image  -- passing environment variable to container using env file
+
 docker stop <container-id> -- to stop container
 
 docker start <container-id> -- to start the container
