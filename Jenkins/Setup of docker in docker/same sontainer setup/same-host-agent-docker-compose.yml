@@ -1,9 +1,8 @@
 version: "3.9"
 
 services:
-  jenkins-container:
+  jenkins-controller-container:
     image: jenkins:agent
-    container_name: jenkins
     restart: unless-stopped
     user: root
     ports:
@@ -15,3 +14,4 @@ services:
 
 volumes:
   jenkins_storage:
+

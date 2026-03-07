@@ -1,0 +1,41 @@
+name: jenkins 
+
+version: "3.9"
+
+services:
+
+  jenkins-controller:
+    image: jenkins:agent
+    container_name: jenkins-controller
+    restart: unless-stopped
+    user: root
+
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+    volumes:
+      - jenkins_storage:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+  jenkins-agent:
+    image: jenkins-agent-docker:02
+    container_name: jenkins-agent
+    restart: unless-stopped
+    
+
+    environment:
+      - JENKINS_URL=http://jenkins-controller:8080
+      - JENKINS_AGENT_NAME=inbound-docker-agent
+      - JENKINS_SECRET=125ed72d4920c3ccf6cb538b3e4916f796b21a773505516971d5e46730cb17c5
+      
+
+    volumes:
+      - jenkins_agent_storage:/var/lib/jenkins
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+volumes:
+  jenkins_storage:
+  jenkins_agent_storage:

@@ -1,0 +1,11 @@
+#Issue in docker compose while mapping container yo volume as i was not able to view the data
+
+Be careful while renaming the docker compose file as the name of the storage will also change and will point to newly created volume because we renamed file.
+
+use name: "name of the project" in your compose file to maintain the project name to avoid such issue.
+
+----------- 
+
+# Docker agent permission issue
+
+On agent u need docker.sock permission to run docker command / rather talk to docker daemon on host 

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-controller
+  namespace: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:                           # ← spec is INSIDE template
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        volumeMounts:
+        - name: jenkins-storage
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-storage
+        persistentVolumeClaim:
+          claimName: jenkins-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-controller-service
+  namespace: jenkins
+spec:
+  selector:
+    app: jenkins
+  type: NodePort
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080              # ← Fixed! was 3000, Jenkins runs on 8080
+    nodePort: 32000
+  - name: agent
+    port: 50000
+    targetPort: 50000

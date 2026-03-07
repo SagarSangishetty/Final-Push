@@ -1,0 +1,17 @@
+Developer
+   │
+   ▼
+Jenkins Controller
+   │
+   │ Kubernetes Plugin
+   ▼
+Kubernetes API Server
+   │
+   ▼
+Agent Pod Created
+   │
+   ▼
+Build Runs Inside Pod
+   │
+   ▼
+Pod Deleted After Build

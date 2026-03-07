@@ -1,0 +1,51 @@
+Controller and Agent on same host
+
+Jenkins runs inside a Docker container on the host machine.
+The Jenkins container accesses the host Docker engine using docker.sock.
+Build jobs run as Docker containers created by the host Docker daemon.
+Controller and agent may run in the same container or separate containers.
+
+
+refer docker-compose.yml for this setup but i used same container for controller & build they can been on different machine
+
+
+Docker Host
+   │
+   ├── Docker Engine
+   │
+   └── Jenkins Container
+          │
+          ▼
+    Builds run using docker.sock
+
+Here:
+
+Jenkins controller runs inside a container
+It accesses the host Docker daemon
+Builds run as Docker containers on the host
+
+Docker socket mounted:
+/var/run/docker.sock
+
+----------------------------------
+
+Docker Host
+   │
+   ├── Jenkins Controller Container
+   │
+   ├── Jenkins Agent Container
+   │
+   └── Docker Engine
+
+Both containers can mount:
+/var/run/docker.sock
+
+Connection between them:
+
+SSH
+or
+JNLP
+
+Note : Jenkins gets root-level access to the host Docker engine, which is why some companies prefer Kubernetes-based agents instead.
+       Conatiner are created on host only even if you run docker container on Agent as it share the host docker.sock file 
+

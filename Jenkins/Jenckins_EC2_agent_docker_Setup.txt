@@ -1,0 +1,18 @@
+Jenkins EC2 Controller–Agent Setup
+
+EC2 Instance 1 → Jenkins Controller
+EC2 Instance 2 → Jenkins Agent
+
+Connection Method:
+
+SSH-based communication between controller and agent.
+
+Build Execution:
+
+Jobs run on the agent.
+Build steps execute inside Docker containers on the agent.
+
+Requirements on Agent:
+
+Java (required to run Jenkins agent process)
+Docker (used to run build environments)
