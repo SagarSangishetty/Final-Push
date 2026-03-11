@@ -1,0 +1,4 @@
+In Jenkins Tool setting need to configure the maven auto install on agent
+
+
+Issue : POM default directory is in workspace if not mentioned, if your pom.xml is in different directory mention the path
