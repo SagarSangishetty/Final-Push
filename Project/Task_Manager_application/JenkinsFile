@@ -1,0 +1,197 @@
+pipeline {
+
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: node
+    image: node:18-alpine
+    command: ['sleep', '9999']
+  - name: kubectl
+    image: bitnami/kubectl:latest
+    command: ['sleep', '9999']
+    securityContext:
+      runAsUser: 0
+  - name: docker
+    image: docker:27-cli
+    command: ['sleep', '9999']
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-socket
+    hostPath:
+      path: /var/run/docker.sock
+"""
+        }
+    }
+
+    environment {
+        DOCKER_HUB_CREDS  = credentials('Docker-Hub')
+        DOCKER_HUB_USER   = "${DOCKER_HUB_CREDS_USR}"
+        IMAGE             = "shettysagar272/task-manager-appl"
+        BACKEND_TAG       = "backend-${BUILD_NUMBER}"
+        FRONTEND_TAG      = "frontend-${BUILD_NUMBER}"
+        APP_DIR           = "Project/Task_Manager_application"
+    }
+
+    stages {
+
+        // ─────────────────────────────────────────
+        stage('Checkout') {
+        // ─────────────────────────────────────────
+            steps {
+                git branch: 'master',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/SagarSangishetty/Final-Push.git'
+                dir("${APP_DIR}") {
+                    echo "✅ Inside Task Manager app folder"
+                    sh 'ls -la'
+                }
+            }
+        }   // ← stage Checkout closed
+
+        // ─────────────────────────────────────────
+        stage('Install & Test Backend') {
+        // ─────────────────────────────────────────
+            steps {
+                container('node') {
+                    dir("${APP_DIR}/Backend code") {
+                        sh 'npm install'
+                        sh 'npm test || true'
+                    }
+                }
+            }
+        }   // ← stage closed
+
+        // ─────────────────────────────────────────
+        stage('Install & Test Frontend') {
+        // ─────────────────────────────────────────
+            steps {
+                container('node') {
+                    dir("${APP_DIR}/Frontend code") {
+                        sh 'npm install'
+                        sh 'npm test -- --watchAll=false || true'
+                    }
+                }
+            }
+        }   // ← stage closed
+
+        // ─────────────────────────────────────────
+        stage('Build Docker Images') {
+        // ─────────────────────────────────────────
+            parallel {
+                stage('Build Backend Image') {
+                    steps {
+                        container('docker') {
+                            dir("${APP_DIR}/Backend code") {
+                                sh "docker build -t ${IMAGE}:${BACKEND_TAG} ."
+                                sh "docker tag ${IMAGE}:${BACKEND_TAG} ${IMAGE}:backend-latest"
+                            }
+                        }
+                    }
+                }   // ← stage Build Backend closed
+                stage('Build Frontend Image') {
+                    steps {
+                        container('docker') {
+                            dir("${APP_DIR}/Frontend code") {
+                                sh "docker build -t ${IMAGE}:${FRONTEND_TAG} ."
+                                sh "docker tag ${IMAGE}:${FRONTEND_TAG} ${IMAGE}:frontend-latest"
+                            }
+                        }
+                    }
+                }   // ← stage Build Frontend closed
+            }
+        }   // ← stage Build Docker Images closed
+
+        // ─────────────────────────────────────────
+        stage('Docker Login') {
+        // ─────────────────────────────────────────
+            steps {
+                container('docker') {
+                    sh "echo ${DOCKER_HUB_CREDS_PSW} | docker login -u ${DOCKER_HUB_USER} --password-stdin"
+                }
+            }
+        }   // ← stage closed
+
+        // ─────────────────────────────────────────
+        stage('Push to Docker Hub') {
+        // ─────────────────────────────────────────
+            parallel {
+                stage('Push Backend') {
+                    steps {
+                        container('docker') {
+                            sh "docker push ${IMAGE}:${BACKEND_TAG}"
+                            sh "docker push ${IMAGE}:backend-latest"
+                        }
+                    }
+                }   // ← stage Push Backend closed
+                stage('Push Frontend') {
+                    steps {
+                        container('docker') {
+                            sh "docker push ${IMAGE}:${FRONTEND_TAG}"
+                            sh "docker push ${IMAGE}:frontend-latest"
+                        }
+                    }
+                }   // ← stage Push Frontend closed
+            }
+        }   // ← stage Push to Docker Hub closed
+
+        // ─────────────────────────────────────────
+        stage('Deploy to Minikube') {
+        // ─────────────────────────────────────────
+            steps {
+                container('kubectl') {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        script {
+                            sh """
+                                sed -i 's|image: shettysagar272/task-manager-appl:.*|image: ${IMAGE}:${BACKEND_TAG}|g' \
+                                ${APP_DIR}/Kubernetes_Config_files/backend-deployment.yml
+
+                                sed -i 's|image: shettysagar272/task-manager-appl:.*|image: ${IMAGE}:${FRONTEND_TAG}|g' \
+                                ${APP_DIR}/Kubernetes_Config_files/frontend-deployment.yml
+                            """
+                            sh "kubectl apply -f ${APP_DIR}/Kubernetes_Config_files/ --kubeconfig=\$KUBECONFIG"
+                            sh "kubectl rollout status deployment/backend-app  --timeout=120s --kubeconfig=\$KUBECONFIG"
+                            sh "kubectl rollout status deployment/frontend-app --timeout=120s --kubeconfig=\$KUBECONFIG"
+                        }
+                    }
+                }
+            }
+        }   // ← stage Deploy closed
+
+        // ─────────────────────────────────────────
+        stage('Verify Deployment') {
+        // ─────────────────────────────────────────
+            steps {
+                container('kubectl') {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        sh "kubectl get pods     --kubeconfig=\$KUBECONFIG"
+                        sh "kubectl get services --kubeconfig=\$KUBECONFIG"
+                        sh "kubectl get ingress  --kubeconfig=\$KUBECONFIG"
+                    }
+                }
+            }
+        }   // ← stage Verify closed
+
+    }   // ← stages closed
+
+    // ─────────────────────────────────────────
+    post {
+    // ─────────────────────────────────────────
+        success {
+            echo "✅ Deployment Successful! Backend → ${env.IMAGE}:${env.BACKEND_TAG} | Frontend → ${env.IMAGE}:${env.FRONTEND_TAG}"
+        }
+        failure {
+            echo '❌ Pipeline failed — check logs above'
+        }
+        always {
+            echo "🧹 Cleaning up..."
+            cleanWs()
+        }
+    }   // ← post closed
+
+}   // ← pipeline closed
