@@ -1,0 +1,26 @@
+# -------- Stage 1 : Builder --------
+    
+FROM node:18-alpine AS builder
+
+# Set working directory inside container
+WORKDIR /app
+
+# Copying requirnment files
+COPY package*.json .
+
+# Install dependencies
+RUN npm install
+
+#Copy application code 
+COPY . .
+
+# -------- Stage 2 : Runtime --------
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app .
+
+#Running application
+CMD [ "npm" , "start"]
