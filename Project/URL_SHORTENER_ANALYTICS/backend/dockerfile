@@ -1,0 +1,27 @@
+# -------- Stage 1 : Builder --------
+
+FROM python:3.12-slim-bookworm AS builder
+
+# Set working directory inside container
+WORKDIR /app
+
+# Copying requirnment files
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# -------- Stage 2 : Runtime --------
+
+FROM python:3.12-slim-bookworm
+
+WORKDIR /app
+
+#Copy installed package
+COPY --from=builder /install /usr/local
+
+#Copy application code 
+COPY . .
+
+#Command to run the python app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

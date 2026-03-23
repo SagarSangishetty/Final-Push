@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-backend
+  namespace: urlshortener
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      containers:
+      - name: backend-container
+        image: shettysagar272/urlshortener:Backend-04
+
+        envFrom:
+        - configMapRef:
+            name: url-shortener-config-map
+
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: url-shortener-secret
+              key: DB_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlshortener-backend-service
+  namespace: urlshortener
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: backend
+
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000

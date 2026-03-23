@@ -154,7 +154,7 @@ spec:
                                 sed -i 's|image: shettysagar272/task-manager-appl:.*|image: ${IMAGE}:${FRONTEND_TAG}|g' \
                                 ${APP_DIR}/Kubernetes_Config_files/frontend-deployment.yml
                             """
-                            sh "kubectl apply -f ${APP_DIR}/Kubernetes_Config_files/ --kubeconfig=\$KUBECONFIG"
+                            sh "kubectl apply -f ${APP_DIR}/Kubernetes_Config_files/ --validate=false --kubeconfig=\$KUBECONFIG"
                             sh "kubectl rollout status deployment/backend-app  --timeout=120s --kubeconfig=\$KUBECONFIG"
                             sh "kubectl rollout status deployment/frontend-app --timeout=120s --kubeconfig=\$KUBECONFIG"
                         }

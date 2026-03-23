@@ -3,7 +3,8 @@ import { getURLs, createURL, deleteURL, getURLStats } from './api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import './App.css';
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// ✅ FIXED — uses current domain, works everywhere
+const BASE_URL = window.location.origin;
 
 export default function App() {
   const [urls, setUrls]           = useState([]);
@@ -45,6 +46,7 @@ export default function App() {
     catch { setError('Failed to delete'); }
   };
 
+  // ✅ FIXED — copies correct short URL using current domain
   const handleCopy = (code) => {
     navigator.clipboard.writeText(`${BASE_URL}/${code}`);
     setCopied(code);
@@ -60,7 +62,6 @@ export default function App() {
     } catch { setError('Failed to load stats'); }
   };
 
-  // Aggregate browser stats for chart
   const browserData = () => {
     if (!stats?.clicks?.length) return [];
     const counts = {};
@@ -70,7 +71,6 @@ export default function App() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   };
 
-  // Clicks per day for chart
   const clicksByDay = () => {
     if (!stats?.clicks?.length) return [];
     const counts = {};
@@ -83,7 +83,6 @@ export default function App() {
 
   const totalClicks = urls.reduce((sum, u) => sum + (u.click_count || 0), 0);
   const topURL = urls.reduce((top, u) => (!top || u.click_count > top.click_count) ? u : top, null);
-
   const CHART_COLORS = ['#00e5ff', '#ff6b6b', '#00e676', '#ffd740', '#b388ff'];
 
   return (
@@ -173,7 +172,7 @@ export default function App() {
                   <div key={url.id} className="url-card">
                     <div className="url-left">
                       <div className="url-short">
-                        <span className="base">{BASE_URL.replace('http://', '')}/</span>
+                        <span className="base">{BASE_URL.replace('http://', '').replace('https://', '')}/</span>
                         <span className="code">{url.short_code}</span>
                       </div>
                       <div className="url-original" title={url.original_url}>

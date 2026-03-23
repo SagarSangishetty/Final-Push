@@ -1,9 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-app
+  name: urlshortener-frontend
+  namespace: urlshortener
 spec:
-  replicas: 0
+  replicas: 2
   selector:
     matchLabels:
       app: frontend
@@ -14,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend-container
-        image: shettysagar272/task-manager-appl:Frontend02
+        image: shettysagar272/urlshortener:Frontend-06
 
 
 ---
@@ -22,12 +23,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: urlshortener-frontend-service
+  namespace: urlshortener
 spec:
   selector:
     app: frontend
   ports:
   - name: http
-    port: 8080
-    targetPort: 3000
+    port: 80
+    targetPort: 80
   type: ClusterIP

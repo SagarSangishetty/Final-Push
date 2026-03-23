@@ -1,0 +1,18 @@
+# frontend-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: urlshortener-frontend-ingress
+  namespace: urlshortener
+spec:
+  rules:
+  - host: urlshortener.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: urlshortener-frontend-service
+            port:
+              number: 80
