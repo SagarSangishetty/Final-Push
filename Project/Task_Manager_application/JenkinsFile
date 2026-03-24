@@ -32,10 +32,10 @@ spec:
     environment {
         DOCKER_HUB_CREDS  = credentials('Docker-Hub')
         DOCKER_HUB_USER   = "${DOCKER_HUB_CREDS_USR}"
-        IMAGE             = "shettysagar272/task-manager-appl"
+        IMAGE             = "shettysagar272/urlshortener"
         BACKEND_TAG       = "backend-${BUILD_NUMBER}"
         FRONTEND_TAG      = "frontend-${BUILD_NUMBER}"
-        APP_DIR           = "Project/Task_Manager_application"
+        APP_DIR           = "Project/URL_SHORTENER_ANALYTICS"
     }
 
     stages {
@@ -55,39 +55,13 @@ spec:
         }   // ← stage Checkout closed
 
         // ─────────────────────────────────────────
-        stage('Install & Test Backend') {
-        // ─────────────────────────────────────────
-            steps {
-                container('node') {
-                    dir("${APP_DIR}/Backend code") {
-                        sh 'npm install'
-                        sh 'npm test || true'
-                    }
-                }
-            }
-        }   // ← stage closed
-
-        // ─────────────────────────────────────────
-        stage('Install & Test Frontend') {
-        // ─────────────────────────────────────────
-            steps {
-                container('node') {
-                    dir("${APP_DIR}/Frontend code") {
-                        sh 'npm install'
-                        sh 'npm test -- --watchAll=false || true'
-                    }
-                }
-            }
-        }   // ← stage closed
-
-        // ─────────────────────────────────────────
         stage('Build Docker Images') {
         // ─────────────────────────────────────────
             parallel {
                 stage('Build Backend Image') {
                     steps {
                         container('docker') {
-                            dir("${APP_DIR}/Backend code") {
+                            dir("${APP_DIR}/backend") {
                                 sh "docker build -t ${IMAGE}:${BACKEND_TAG} ."
                                 sh "docker tag ${IMAGE}:${BACKEND_TAG} ${IMAGE}:backend-latest"
                             }
@@ -97,7 +71,7 @@ spec:
                 stage('Build Frontend Image') {
                     steps {
                         container('docker') {
-                            dir("${APP_DIR}/Frontend code") {
+                            dir("${APP_DIR}/frontend") {
                                 sh "docker build -t ${IMAGE}:${FRONTEND_TAG} ."
                                 sh "docker tag ${IMAGE}:${FRONTEND_TAG} ${IMAGE}:frontend-latest"
                             }
@@ -148,15 +122,15 @@ spec:
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         script {
                             sh """
-                                sed -i 's|image: shettysagar272/task-manager-appl:.*|image: ${IMAGE}:${BACKEND_TAG}|g' \
-                                ${APP_DIR}/Kubernetes_Config_files/backend-deployment.yml
+                                sed -i 's|image: shettysagar272/urlshortener:.*|image: ${IMAGE}:${BACKEND_TAG}|g' \
+                                ${APP_DIR}/Kubernetes_config/backend.yml
 
-                                sed -i 's|image: shettysagar272/task-manager-appl:.*|image: ${IMAGE}:${FRONTEND_TAG}|g' \
-                                ${APP_DIR}/Kubernetes_Config_files/frontend-deployment.yml
+                                sed -i 's|image: shettysagar272/urlshortener:.*|image: ${IMAGE}:${FRONTEND_TAG}|g' \
+                                ${APP_DIR}/Kubernetes_config/frontend.yml
                             """
-                            sh "kubectl apply -f ${APP_DIR}/Kubernetes_Config_files/ --validate=false --kubeconfig=\$KUBECONFIG"
-                            sh "kubectl rollout status deployment/backend-app  --timeout=120s --kubeconfig=\$KUBECONFIG"
-                            sh "kubectl rollout status deployment/frontend-app --timeout=120s --kubeconfig=\$KUBECONFIG"
+                            sh "kubectl apply -f ${APP_DIR}/Kubernetes_config/ --namespace=urlshortener --validate=false --kubeconfig=\$KUBECONFIG"
+                            sh "kubectl rollout status deployment/urlshortener-backend --namespace=urlshortener --timeout=120s --kubeconfig=\$KUBECONFIG"
+                            sh "kubectl rollout status deployment/urlshortener-frontend --namespace=urlshortener --timeout=120s --kubeconfig=\$KUBECONFIG"
                         }
                     }
                 }
