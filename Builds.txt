@@ -1,0 +1,32 @@
+python ----- /usr/local
+need to run pip install -r requirement.txt as this is needed to download the dependencies & after this u can copy the source code and copy the build file in the above default location
+
+Same image for both build and run code : python:3.12-slim-bookworm
+
+-----------------------------------------------------
+
+Ngnix is use to deploy the static file in node js and below is the default location 
+default ngnix hosting location ------  /usr/share/nginx/html
+to start server "nginx -g daemon off"
+
+
+package.jason is required to run npm install and 
+"npm run build -- --configuration" production to build application and the build files are in location "/dist/docker-angular-test/browser"
+to build use image : "node:22-alpine"
+
+****Here node_module is imp copy this from builder stage to run time stage***** imp step for simple node appliacation
+
+Note : Once u buil the application use ngnix to run the code.
+       No need to copy entire source code as we need only build files	
+
+------------------------------------------------------------
+
+Java --- pom.xml is used to download the dependency usin command "mvn dependency:go-offline" & mvn clean package (to build the code)
+
+to build image : maven:3.9-eclipse-temurin-21
+to run the code image : eclipse-temurin:21-jre
+
+Once u build maven will create a jar file <dockerworkdir>/target/demo-0.0.1-SNAPSHOT.jar & you can run the jar file to host the application "java -jar <jarfile>"
+You need to rename the jar file demo-0.0...(demo... is default name maven will give to jar file) to something short show in below command in run time stage
+"COPY --from=builder /app/target/demo-0.0.1-SNAPSHOT.jar  app.jar"
+

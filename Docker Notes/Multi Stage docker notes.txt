@@ -1,0 +1,5 @@
+Multi-stage build = 2 temporary containers during build, 1 final image
+Stage 1 stays alive until Stage 2 finishes copying from it, then destroyed
+Final image = only the clean, necessary files
+
+FROM python:3.12-slim-bookworm AS builder  --  this is just the stage name which is builder in this stage we build all necessary build files

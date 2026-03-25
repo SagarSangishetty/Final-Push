@@ -1,0 +1,31 @@
+git rebase <branch name>  --- Git rebase rewrites the current branch by replaying its commits on top of another branch without modifying the target branch.
+
+git rebase --continue   --- After fixing conflicts
+
+git rebase --abort  --- Cancel and go back to original state
+
+git rebase --- Skip problematic commit during rebase
+
+git rebase origin/main  --- Rebase on latest remote changes
+
+-----------------------------
+
+git stash --- Save changes
+
+git stash push -m "work in progress" --- Save with message
+
+git stash list --- View stashes
+
+git stash apply --- Apply stash (keep it)
+
+git stash pop --- Apply + remove (most common)
+
+git stash -u --- Include untracked files
+
+git stash apply stash@{0} -- Apply specific stash 
+
+git stash drop stash@{0} --- Delete stash
+
+git stash clear --- Clear all 	
+
+git stash show -p --- See what’s inside stash
