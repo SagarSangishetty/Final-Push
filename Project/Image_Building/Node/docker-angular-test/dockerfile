@@ -16,7 +16,17 @@ RUN npm run build -- --configuration production
 
 FROM nginx:alpine
 
+# Create non-root user
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 COPY --from=builder /app/dist/docker-angular-test/browser /usr/share/nginx/html
+
+# Fix permissions
+RUN chown -R appuser:appgroup /app
+
+# Switch user
+USER appuser
 
 EXPOSE 80
 

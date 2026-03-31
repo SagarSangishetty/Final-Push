@@ -31,7 +31,12 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    try:
+        conn = engine.connect()
+        conn.close()
+        return {"status": "ok"}
+    except:
+        raise HTTPException(status_code=500, detail="DB not ready")
 
 # ── Create short URL ──────────────────────────────
 @app.post("/urls", response_model=schemas.URLOut)

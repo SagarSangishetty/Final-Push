@@ -19,6 +19,29 @@ spec:
       - name: backend-container
         image: shettysagar272/urlshortener:Backend-04
 
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+
+        livenessProbe:
+          httpGet:
+            path: /api
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5   
+          failureThreshold: 3 
+
         envFrom:
         - configMapRef:
             name: url-shortener-config-map
