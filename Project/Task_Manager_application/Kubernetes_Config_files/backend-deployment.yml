@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend-container
-        image: shettysagar272/task-manager-appl:Backend01
+        image: shettysagar272/task-manager-appl:Backend02
         
         resources:
           requests:
@@ -26,18 +26,19 @@ spec:
 
         livenessProbe:
           httpGet:
-            path: /api
+            path: /health
             port: 4000
-          initialDelaySeconds: 10
+          initialDelaySeconds: 50
           periodSeconds: 10
+          failureThreshold: 1
 
         readinessProbe:
           httpGet:
-            path: /health
+            path: /api
             port: 4000
-          initialDelaySeconds: 5
+          initialDelaySeconds: 60
           periodSeconds: 5   
-          failureThreshold: 3 
+          failureThreshold: 1 
         
         env:
         - name: DB_HOST
