@@ -1,0 +1,55 @@
+EC2 (Elastic cloud Compute) -
+EC2 (Elastic Compute Cloud) is a service from Amazon Web Services that lets you create and run virtual machines in the cloud
+
+Types of EC2 instance - 
+General Purpose
+Balanced CPU, memory, and networking
+
+Best for: Web servers, small apps
+Example: t3, t4g, m5
+
+Compute Optimised
+High CPU performance
+
+Best for:
+Batch processing
+Gaming servers
+High-performance APIs
+Example: c5, c6
+
+Memory
+High RAM
+
+Best for:
+Databases
+Caching (Redis)
+Real-time analytics
+Example: r5, x1
+
+Storage
+High disk throughput (fast I/O)
+
+Best for:
+Big data
+Data warehousing
+Log processing
+Example: i3, d2
+
+Accelerated
+Uses GPU / hardware accelerators
+
+Best for:
+Machine Learning
+AI workloads
+Video rendering
+Example: p3, g4
+
+************************************************************************
+
+Region & Availability Zone
+
+Region are location where AWS has multiple data center.
+Region = Geographic area
+
+An Availability Zone is a location within a Region that contains one or more data centers.
+AZ = Data center location

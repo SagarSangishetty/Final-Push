@@ -1,0 +1,36 @@
+What is Cloud ?
+
+Using remote computers over the internet instead of your own system
+Cloud Give you 
+Servers (compute power)
+Storage (files, databases)
+Networking
+Tools (AI, DevOps, monitoring)
+
+*******************************
+
+Private Cloud & Public Cloud
+
+Public Cloud = cloud services provided over the internet and shared across multiple users
+✔ Key points:
+Accessible from anywhere (via internet)
+Owned & managed by providers like
+Amazon Web Services, Microsoft Azure, Google Cloud
+Resources are shared (multi-tenant)
+Pay-as-you-go model 💰
+🧠 Example:
+Using AWS EC2 → you don’t own the server, you rent it
+
+Private cloud = cloud infrastructure used by only one organization
+Key points:
+Not shared with others (single-tenant)
+More secure & controlled 🔐
+Can be:
+On-premise (company data center)
+Or hosted privately
+More expensive 💸
+🧠 Example:
+A bank running its own cloud inside its data center
+
+*******************************
+
