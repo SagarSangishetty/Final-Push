@@ -1,0 +1,15 @@
+AWS IAM -- Identity Access Management 
+
+Service that helps us securely control access to AWS resources.
+
+Solving a problem of Authentication & Authorization 
+
+Authentication → verifies who the user is (like login with username, password, or access keys)
+Authorization → defines what the user is allowed to do (using policies and permissions)
+
+
+Components of IAM : 
+Users → Individual identities created for people or applications to access AWS
+Policies → JSON documents that define permissions (what actions are allowed or denied)
+Groups → Collection of users to manage permissions easily in bulk
+Roles → Temporary access assigned to users/services without sharing credentials

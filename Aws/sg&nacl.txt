@@ -1,0 +1,62 @@
+Security Group:
+
+Instance-level firewall
+Can ALLOW and DENY traffic ✅ (You missed DENY!)
+Stateful (remembers connections i.e if inbound connection comes on port 22 it will remember and send the response)
+Lighter weight
+Used more often
+
+NACL:
+
+Subnet-level firewall
+Can ALLOW and DENY traffic ✅ (You got this right!)
+Stateless (doesn't remember i.e if inbound connection comes on port 22 it will not remember and we need to define the explicit outbound port
+	  (ephemeral ports 1024-65535)so that we send the response)
+More granular control
+Used for broad subnet-level rules
+
+
+Main Difference:
+  SG = Stateful (smart, remembers)
+  NACL = Stateless (dumb, needs explicit rules)
+
+If EITHER blocks → Traffic stops
+If BOTH allow → Traffic flows
+
+Problem : 
+
+STEP 1: SSH Request Comes In (Port 22)
+         ↓
+     NACL Inbound Rule #100: Allow port 22 ✅
+         ↓
+     SG: Allow port 22 ✅
+         ↓
+     EC2 receives request ✅
+
+STEP 2: EC2 Sends Response on Ephemeral Port (e.g., 54321)
+         ↓
+     SG: "I remember port 22 connection, so allow response" ✅
+         ↓
+     NACL Outbound Rules Check:
+     - Rule #200: Allow port 80? NO ❌
+     - Rule #32767: Deny ALL? YES ❌
+         ↓
+     ❌ RESPONSE BLOCKED ❌
+
+Fix : 
+
+RESULT: User sees "Connection timeout" even though request reached EC2!
+
+ How to FIX This (Add Ephemeral Port Range):
+Custom NACL Rules (CORRECTED):
+
+Inbound:
+  Rule #100: Allow port 22 ✅
+
+Outbound:
+  Rule #100: Allow port 22 (for response traffic) ✅
+  Rule #110: Allow port 80 (for HTTP)
+  Rule #120: Allow ephemeral ports 1024-65535 ✅ (FOR RESPONSES!)
+  
+(This ensures responses can go out on random ports)
+
