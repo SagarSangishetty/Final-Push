@@ -1,0 +1,71 @@
+👉 Amazon ECS is a fully managed container orchestration service provided by AWS.
+
+ECS helps you:
+
+Deploy containers
+Manage containers
+Scale containers
+Load balance them
+Restart if they fail
+
+👉 Basically, it handles the lifecycle of containers
+
+What ECS works with
+
+ECS runs your containers using:
+
+EC2 (you manage servers)
+Fargate (serverless, AWS manages servers)
+
+Task Definition 📄
+
+This is like a blueprint
+
+It defines:
+
+Docker image (from ECR)
+CPU & memory
+Ports
+Environment variables
+Logging
+
+Service 🔁
+Keeps tasks running continuously
+Handles scaling & load balancing
+
+
+Flow (this is what interviewers want)
+Build Docker image
+Push to ECR
+Create Task Definition
+Run:
+Task (one-time) OR
+Service (long-running)
+Choose:
+EC2 OR
+Fargate
+
+
+ECS: Task vs Service (Crystal Clear)
+🔹 1. Task 🚀
+
+👉 A Task is a one-time execution of a Task Definition
+
+✅ Use when:
+Batch jobs
+Scripts
+Data processing
+Cron jobs
+🔹 Behavior:
+Runs → completes → stops
+No auto-restart
+No scaling
+🔹 2. Service 🔁
+
+👉 A Service ensures your Tasks are always running
+
+✅ Use when:
+Web apps
+APIs
+Microservices
+Long-running apps

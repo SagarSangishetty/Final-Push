@@ -1,0 +1,5 @@
+Route 53 on AWS provides DNS as a service 
+
+Domain Registration 
+Hosted Zones
+Health checks

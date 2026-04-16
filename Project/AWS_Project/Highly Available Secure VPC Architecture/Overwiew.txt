@@ -1,0 +1,33 @@
+About
+Production-ready AWS architecture
+Designed for high availability + security + scalability
+
+🧩 Architecture (Simple)
+2 Availability Zones (AZs) → fault tolerance
+Public Subnets → Load Balancer + NAT Gateway
+Private Subnets → EC2 servers
+Auto Scaling Group → manages servers
+
+🔁 Flow
+User → Load Balancer → Private EC2
+EC2 → NAT Gateway → Internet (outgoing only)
+
+🔐 Security
+Servers are in private subnet (no direct internet)
+Only Load Balancer can access them
+
+🚀 Key Components
+VPC → network
+ALB → distributes traffic
+Auto Scaling → handles load
+NAT Gateway → internet access for private servers
+
+⭐ Why Used
+High availability (multi-AZ)
+Secure (private servers)
+Scalable (auto scaling)
+Reliable production setup
+
+🎯 One Line (Interview)
+
+Traffic comes via Load Balancer to private EC2 in multi-AZ, with NAT Gateway for outbound access and Auto Scaling for scalability.
