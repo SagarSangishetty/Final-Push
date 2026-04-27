@@ -1,0 +1,47 @@
+👉 Make sure OIDC is enabled:
+eksctl utils associate-iam-oidc-provider \
+  --region us-east-1 \
+  --cluster demo-cluster-4 \
+  --approve
+
+
+First, download the official policy:
+curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+
+
+Now create the policy:
+aws iam create-policy \
+  --policy-name AWSLoadBalancerControllerIAMPolicy \
+  --policy-document file://iam_policy.json
+
+Step 2: Create IAM Role (IRSA) (in this command both are taken care aws role and k8's service account both are created automatically)
+Now we create a role linked with your EKS OIDC provider.
+
+eksctl create iamserviceaccount \
+  --cluster demo-cluster-4 \
+  --region us-east-1 \
+  --namespace kube-system \
+  --name aws-load-balancer-controller \
+  --attach-policy-arn arn:aws:iam::169976490560:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+
+
+👉 Install AWS Load Balancer Controller (Helm)
+
+Step 1: Add Helm Repo
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+
+Step 2: Install AWS Load Balancer Controller
+👉 Replace:
+<cluster-name>
+<region>
+<account-id>
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=demo-cluster-4 \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=us-east-1 \
+  --set vpcId=vpc-01291b4202e46fc00

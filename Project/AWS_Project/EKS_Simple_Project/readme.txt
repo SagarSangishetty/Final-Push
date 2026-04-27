@@ -1,0 +1,1 @@
+A small Java app that returns: “Hello from EKS”
