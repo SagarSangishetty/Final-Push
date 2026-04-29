@@ -1,0 +1,47 @@
+Single command (cluster + node group together)
+
+eksctl create cluster \
+  --name my-cluster \
+  --region ap-south-1 \
+  --nodegroup-name my-nodes \
+  --nodes 2 \
+  --nodes-min 1 \
+  --nodes-max 3 \
+  --node-type t3.medium
+
+✅ Separate node group creation
+
+eksctl create nodegroup \
+  --cluster my-cluster \
+  --name my-nodes \
+  --nodes 3
+
+Create Node Group 1
+
+eksctl create nodegroup \
+  --cluster my-cluster \
+  --name general-nodes \
+  --nodes 3 \
+  --node-type t3.medium
+
+Step 3: Create Node Group 2
+
+eksctl create nodegroup \
+  --cluster my-cluster \
+  --name spot-nodes \
+  --nodes 2 \
+  --node-type t3.medium \
+  --spot
+
+🔍 Step 1: Check node labels
+kubectl get nodes --show-labels
+
+Example: Run pod only on general-nodes
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+spec:
+  nodeSelector:
+    eks.amazonaws.com/nodegroup: general-nodes   -- this is the node lable
