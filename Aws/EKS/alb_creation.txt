@@ -18,7 +18,7 @@ Step 2: Create IAM Role (IRSA) (in this command both are taken care aws role and
 Now we create a role linked with your EKS OIDC provider.
 
 eksctl create iamserviceaccount \
-  --cluster demo-cluster-4 \
+  --cluster cpu-load-cluster \
   --region us-east-1 \
   --namespace kube-system \
   --name aws-load-balancer-controller \
@@ -40,8 +40,8 @@ Step 2: Install AWS Load Balancer Controller
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=demo-cluster \
+  --set clusterName=cpu-load-cluster \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set region=us-east-1 \
-  --set vpcId=vpc-02082af7f5abba4c0
+  --set vpcId=vpc-09a5308aee605d570
