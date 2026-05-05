@@ -1,0 +1,13 @@
+RDS (Relational Database Service)
+What it is:
+AWS managed database service. You don't manage the OS, patches, backups — AWS does.
+How it fits your 3-tier:
+
+Your backend pod connects to RDS exactly like it would connect to a local Postgres — same connection string, same port (5432)
+The only difference is instead of localhost you use the RDS endpoint (a DNS name AWS gives you)
+
+backend pod → RDS endpoint → database
+e.g. mydb.xxxxxx.ap-south-1.rds.amazonaws.com:5432
+Key concepts to know:
+ConceptWhat it meansDB InstanceThe actual database server AWS runs for youSubnet GroupYou tell RDS which subnets it can live in (always private)Security GroupControls who can reach RDS — you allow only backend pod SGMulti-AZAWS runs a standby replica in another AZ for failover — org standardAutomated BackupsAWS takes daily snapshots — you just set retention period
+Interview point: RDS never goes in a public subnet. Ever. Backend pod reaches it privately within the VPC

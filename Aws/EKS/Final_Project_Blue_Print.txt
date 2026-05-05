@@ -1,0 +1,29 @@
+Learn it in This Order
+Phase 1 — Networking Foundation
+
+VPC with public + private subnets (you know this)
+RDS in private subnet — no public access
+Security Groups — RDS only accepts traffic from backend pod SG
+
+Phase 2 — EKS Setup
+
+Cluster via eksctl (you have this)
+ECR — push your 3 images (frontend, backend, db-migration if any)
+EBS CSI Driver addon — in case any pod needs persistent storage
+
+Phase 3 — Connect Backend to RDS
+
+Store RDS endpoint + credentials in AWS Secrets Manager
+Use IRSA to give backend pod permission to read the secret
+Mount secret as env variable in pod (via External Secrets Operator or CSI driver)
+
+Phase 4 — Expose the App
+
+AWS Load Balancer Controller installed on EKS
+Ingress → ALB → frontend service → backend service
+HTTPS using ACM certificate on ALB
+
+Phase 5 — Observability (basic)
+
+CloudWatch Container Insights enabled
+Check pod logs via CloudWatch Log Groups

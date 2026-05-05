@@ -7,7 +7,7 @@ eksctl create cluster \
   --nodes 2 \
   --nodes-min 1 \
   --nodes-max 3 \
-  --node-type t3.medium
+  --node-type t3.micro
 
 ✅ Separate node group creation
 
