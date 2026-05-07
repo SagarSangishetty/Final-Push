@@ -1,0 +1,7 @@
+Key Things to Replace Before Deploying
+In k8s/base/backend-deployment.yaml and ingress.yaml, search for these placeholders:
+
+<YOUR_ECR_ACCOUNT_ID> and <REGION> → your ECR image URIs
+<ACCOUNT_ID> and role ARN → from your eksctl create iamserviceaccount output
+<CERT_ID> → from ACM after you request/validate a certificate
+tasks.yourdomain.com → your Route53 domain
