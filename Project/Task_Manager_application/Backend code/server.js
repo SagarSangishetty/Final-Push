@@ -43,6 +43,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
+app.get('/api', (req, res) => {
+  res.json({ status: 'Api running', timestamp: new Date().toISOString() });
+});
+
 // Get all tasks
 app.get('/api/tasks', async (req, res) => {
   try {

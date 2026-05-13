@@ -31,3 +31,30 @@ Solution : ✅ Fix Your .env DB_PORT=5432 ✔
 Api (backend) was not defined in environment variable file after defining same is working now 
 
 For mult tier application usage of ingress is the best approach as we don't expose backend externally
+
+----------------------------
+
+Probe issue 
+
+The Problem
+
+Container internal port: 3000 (where React dev server actually runs)
+Service exposed port: 8080 (what you exposed to the outside)
+Your readiness probe: Checking http://pod-ip:8080/ ❌
+
+The probe was trying to reach port 8080 inside the container, but the React app was only listening on port 3000, so you got "connection refused."
+The Fix
+You corrected the readiness probe to use port 3000 (the actual port the app listens on inside the container):
+yamlreadinessProbe:
+  httpGet:
+    path: /
+    port: 3000  # ✅ Correct - matches where React actually runs
+```
+
+## Key Takeaway
+```
+Service Port (8080) → Routes to → Container Port (3000)
+                                      ↑
+                        Readiness probe must check HERE
+The readiness/liveness probes must always target the container port (where the app actually listens), not the service port (which is just for external routing).
+Your fix is spot on! The pod should now be healthy and the readiness probe will succeed
