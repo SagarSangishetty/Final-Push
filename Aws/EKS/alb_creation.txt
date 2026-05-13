@@ -18,7 +18,7 @@ Step 2: Create IAM Role (IRSA) (in this command both are taken care aws role and
 Now we create a role linked with your EKS OIDC provider.
 
 eksctl create iamserviceaccount \
-  --cluster cpu-load-cluster \
+  --cluster task-cluster \
   --region us-east-1 \
   --namespace kube-system \
   --name aws-load-balancer-controller \
