@@ -1,0 +1,145 @@
+CUSTOM METRICS
+===========================================
+
+- Metrics that developers define themselves in app code
+- Not built-in to Prometheus — you instrument your own logic
+- Uses Prometheus client library (prometheus_client, prom-client etc)
+- Exposed via /metrics endpoint which Prometheus scrapes
+
+WHEN TO USE:
+- Business logic metrics that infra cannot capture
+- Example: number of orders placed, failed logins,
+  items in cart, payment failures
+
+EXAMPLES BY TYPE:
+
+  Counter  → orders_placed_total
+             failed_login_attempts_total
+
+  Gauge    → active_sessions_current
+             items_in_cart
+
+  Histogram → order_processing_duration_seconds
+               payment_api_response_time
+
+CODE EXAMPLE (Python):
+-----------------------
+from prometheus_client 
+import Counter, Gauge, start_http_server
+
+orders_total = Counter('orders_placed_total', 'Total orders placed')
+active_sessions = Gauge('active_sessions_current', 'Current active sessions')
+
+# In your app logic
+orders_total.inc()           # order placed
+active_sessions.inc()        # user logged in
+active_sessions.dec()        # user logged out
+
+start_http_server(8000)      # exposes /metrics
+
+===========================================
+KEY DIFFERENCE
+===========================================
+
+Default Metrics   -- Prometheus/exporters collect automatically
+                     (CPU, memory, HTTP stats)
+
+Custom Metrics    -- Developer instruments manually in app code
+                     (business logic, app-specific events)
+
+===========================================
+
+===========================================
+PROMETHEUS METRIC TYPES
+===========================================
+
+1. COUNTER
+-----------
+- Only increments, never decrements
+- Resets to 0 on app restart
+- Example: Login count, HTTP request count, error count
+
+2. GAUGE
+---------
+- Increments and decrements
+- Represents current state/snapshot
+- Example: CPU usage, memory, running pods, configmaps count
+
+3. HISTOGRAM
+-------------
+- Buckets of observations — counts how many fall in a range
+- Buckets defined at Prometheus/config side
+- Can aggregate across multiple instances
+- Example: HTTP request duration
+  (how many requests took 0-100ms, 100-300ms, 300ms+)
+
+4. SUMMARY
+-----------
+- Calculates percentiles/quantiles at app side (not Prometheus side)
+- Quantiles locked in at code time, cannot change later
+- Cannot aggregate across multiple instances
+- Example: 95th percentile response time
+  (95% of requests completed under 200ms)
+
+-------------------------------------------
+HISTOGRAM vs SUMMARY
+-------------------------------------------
+|               | Histogram       | Summary          |
+|---------------|-----------------|------------------|
+| Defined at    | Config side     | App/code side    |
+| Aggregatable  | Yes             | No               |
+| Flexibility   | High            | Low              |
+| Prefer when   | Need flexibility | Know percentiles upfront |
+
+Histogram is more commonly used in practice.
+
+===========================================
+
+The complete flow:
+App (instrumented with custom metrics)
+        ↓
+/metrics endpoint exposed (via Prometheus client library)
+        ↓
+Kubernetes Service (exposes the pod's /metrics port)
+        ↓
+ServiceMonitor (tells Prometheus — scrape this Service)
+        ↓
+Prometheus (scrapes and stores metrics)
+
+Why ServiceMonitor specifically:
+In plain Prometheus you manually add targets in prometheus.yml. But in Kubernetes that's impractical — pods come and go.
+So Prometheus Operator introduced ServiceMonitor — a Kubernetes CRD (Custom Resource Definition) that lets you define scrape targets in a Kubernetes-native way.
+Prometheus Operator watches for ServiceMonitor objects and automatically updates Prometheus config — no manual editing needed.
+
+Your flow refined:
+1. INSTRUMENT   → Developer adds prometheus client library
+                  in app code, defines custom metrics
+                  exposes /metrics endpoint
+
+2. SERVICE      → Kubernetes Service points to pod's
+                  /metrics port
+
+3. SERVICEMONITOR → Tells Prometheus Operator
+                    "scrape this Service, at this path,
+                    at this interval"
+
+4. PROMETHEUS   → Scrapes /metrics, stores in TSDB
+
+Simple ServiceMonitor YAML:
+yamlapiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-app-monitor
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: my-app        # matches your app's Service label
+  endpoints:
+    - port: metrics      # name defined in your Service spec
+      path: /metrics     # endpoint your app exposes (default)
+      interval: 30s       # how frequently Prometheus scrapes
+
+Key point:
+ServiceMonitor only works if Prometheus Operator is installed in your cluster. It's the operator that reads ServiceMonitor and configures Prometheus automatically.
+Without Operator — you manually edit prometheus.yml (like physical server approach).

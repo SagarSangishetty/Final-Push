@@ -1,0 +1,129 @@
+Prometheus (evaluates alert rules)
+        ↓
+Alertmanager (handles routing, silencing, notifications)
+
+Alertmanager side — what happens after alert fires:
+Alertmanager handles:
+
+Routing — send to right team (slack, email, pagerduty)
+Grouping — group multiple alerts into one notification
+Silencing — mute alerts during maintenance
+Inhibition — if critical alert fires, suppress related minor alerts
+
+-----------------------------
+-----------------------------
+
+ In Kubernetes the standard way is using Prometheus Operator which gives you everything as Kubernetes native resources.
+
+PrometheusRule    → define alert rules (k8s native)
+Alertmanager      → deploy alertmanager
+AlertmanagerConfig → configure routing/receivers
+ServiceMonitor    → scrape config (already covered)
+
+ Install Prometheus Operator (kube-prometheus-stack)
+Most common way — Helm chart that installs everything together:
+
+Prometheus
+Alertmanager
+Grafana
+Node Exporter
+Default dashboards and alert rules
+
+
+-------------PrometheusRule (alert rules in k8s native way)----------------
+
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: my-app-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack   # must match Prometheus operator label selector
+spec:
+  groups:
+    - name: my-app-alerts
+      rules:
+        - alert: HighCPUUsage
+          expr: cpu_usage_percent > 80
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU on {{ $labels.instance }}"
+            description: "CPU above 80% for 2 minutes"
+
+
+------------------Step 3 — Alertmanager configuration (routing)------------------
+
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: my-app-alertmanager-config
+  namespace: monitoring
+spec:
+  route:
+    receiver: slack-notifications
+    groupBy: ['alertname', 'severity']
+    groupWait: 30s        # wait before sending first notification
+    groupInterval: 5m     # wait before sending updated notification
+    repeatInterval: 12h   # resend if alert still firing after this
+  receivers:
+    - name: slack-notifications
+      slackConfigs:
+        - apiURL: 'https://hooks.slack.com/services/xxx/yyy/zzz'
+          channel: '#alerts'
+          text: '{{ .CommonAnnotations.description }}'
+
+-----------------------------------------------------------------
+
+Complete flow in K8s:
+PrometheusRule (alert condition defined)
+        ↓
+Prometheus evaluates every 30s
+        ↓
+Condition met → alert goes Pending → Firing
+        ↓
+Prometheus sends to Alertmanager
+        ↓
+AlertmanagerConfig (routing rules)
+        ↓
+Slack / Email / PagerDuty notification
+
+Important label:
+yamlmetadata:
+  labels:
+    release: kube-prometheus-stack
+This label is critical on PrometheusRule — Prometheus Operator only picks up rules that match its label selector. Without this label your alert rules will be ignored.
+
+
+-----------------------------------
+
+Resource           | Is it a Pod? | What it is
+-------------------|--------------|----------------------------------
+PrometheusRule     | No           | Just a config object (CRD)
+                   |              | Defines alert conditions
+                   |              |
+Prometheus         | Yes          | Actually evaluates the rules
+                   |              | Scrapes metrics, stores in TSDB
+                   |              |
+Alertmanager       | Yes          | Receives and routes alerts
+                   |              | Handles Slack/Email/PagerDuty
+                   |              |
+Prometheus         | Yes          | Watches CRDs (PrometheusRule,
+Operator           |              | ServiceMonitor etc)
+                   |              | Configures Prometheus automatically
+
+-----------------------------------------------------------------------------------------------------
+Routing Mechanism
+  
+metadata:
+  labels:
+    release: kube-prometheus-stack   # for Operator — pick up this rule
+
+spec:
+  rules:
+    labels:
+      severity: warning              # for Alertmanager — route this alert
+
+All routing  is based on label defined in spec block which matched in rule config and send the alert, if the labels are not defined will send all the alerts to slack

@@ -1,0 +1,29 @@
+Metrics
+Metrics is the collection of historical and current measurements of a system in raw numerical format.
+Examples of raw metrics:
+- CPU utilization = 87%
+- Memory usage = 1.2GB
+- HTTP requests = 1500 per second
+- Pod restarts = 3
+- Disk usage = 70%
+- Response time = 250ms
+Key point — Metrics alone are just raw numbers. They have no meaning until something processes and visualizes them.
+
+Monitoring
+Monitoring is the process of collecting metrics, visualizing them, and alerting on them in a systematic way.
+How metrics reach the monitoring system — 2 approaches:
+Push model
+Application/Agent → pushes metrics → Monitoring System
+Example: CloudWatch Agent pushes metrics to CloudWatch
+Pull model (Scraping)
+Monitoring System → pulls metrics → from Application/Agent
+Example: Prometheus scrapes metrics from your pods every 15 seconds
+
+What Monitoring Does
+Step 1 — Collect   → gather raw metrics via push or pull
+Step 2 — Store     → save metrics with timestamps (time series data)
+Step 3 — Visualize → show on dashboards and graphs (Grafana)
+Step 4 — Alert     → notify when threshold is crossed (Slack, email, PagerDuty)
+
+Metrics vs Monitoring — The Difference
+MetricsMonitoringWhat it is Raw data System that processes raw dataFormatNumbersGraphs, dashboards, alertsExampleCPU = 87%Grafana graph showing CPU trend + alert when CPU > 80%ToolNode Exporter, kube-state-metricsPrometheus + Grafana

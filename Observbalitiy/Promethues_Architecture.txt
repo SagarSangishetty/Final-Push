@@ -1,0 +1,172 @@
+Prometheus Architecture
+Prometheus is a pull-based monitoring system — it goes and collects metrics from targets, stores them, and allows querying.
+
+Architecture Diagram
+                    ┌─────────────────────────────────┐
+                    │         Prometheus Server         │
+                    │                                   │
+  ┌──────────┐      │  ┌──────────┐  ┌─────────────┐  │
+  │  Service  │◄─────│  │ Scraper  │  │   TSDB      │  │
+  │ Discovery │      │  │(Pull)    │─►│ (Storage)   │  │
+  └──────────┘      │  └──────────┘  └─────────────┘  │
+                    │                       │           │
+                    │              ┌────────┘           │
+                    │              ▼                    │
+                    │       ┌──────────┐               │
+                    │       │  PromQL  │               │
+                    │       │ (Query)  │               │
+                    │       └──────────┘               │
+                    └──────────────┬──────────────────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    ▼              ▼               ▼
+               ┌─────────┐  ┌──────────┐  ┌───────────┐
+               │ Grafana  │  │  Alert   │  │   API     │
+               │Dashboard │  │ Manager  │  │  Clients  │
+               └─────────┘  └──────────┘  └───────────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    ▼              ▼               ▼
+                ┌───────┐    ┌─────────┐    ┌──────────┐
+                │ Slack │    │  Email  │    │PagerDuty │
+                └───────┘    └─────────┘    └──────────┘
+
+Components One by One
+1. Targets (What Prometheus scrapes)
+These are the applications or agents that expose metrics on an HTTP endpoint.
+Your EKS cluster targets:
+- Node Exporter      → exposes node metrics  (CPU, disk, memory)
+- kube-state-metrics → exposes K8s metrics   (pod status, restarts)
+- Your FastAPI app   → exposes app metrics   (request count, latency)
+- cAdvisor           → exposes container metrics
+Every target exposes metrics at:
+http://<pod-ip>:port/metrics
+Example output at /metrics:
+# CPU usage
+container_cpu_usage_seconds_total{pod="backend-xxx"} 0.023
+
+# Memory
+container_memory_usage_bytes{pod="backend-xxx"} 134217728
+
+# HTTP requests
+http_requests_total{method="GET", status="200"} 1500
+
+2. Service Discovery
+Prometheus needs to know where to scrape. In Kubernetes it automatically discovers targets using:
+- Pod annotations
+- Service monitors
+- Node labels
+You don't manually list every pod IP — Prometheus watches Kubernetes API and finds targets automatically.
+
+3. Scraper (Pull mechanism)
+Prometheus pulls metrics from every target at a fixed interval.
+Default interval → every 15 seconds
+Every 15s:
+Prometheus → GET http://backend-pod:8000/metrics → stores data
+Prometheus → GET http://node-exporter:9100/metrics → stores data
+Prometheus → GET http://kube-state-metrics:8080/metrics → stores data
+
+4. TSDB (Time Series Database)
+Prometheus stores all scraped data in its own built-in Time Series Database.
+Time series = metric name + labels + value + timestamp
+
+Example:
+http_requests_total{method="GET", pod="backend-xxx"} 1500 @10:00:00
+http_requests_total{method="GET", pod="backend-xxx"} 1520 @10:00:15
+http_requests_total{method="GET", pod="backend-xxx"} 1543 @10:00:30
+Default retention → 15 days. For longer retention use remote storage like Thanos or Cortex.
+
+5. PromQL (Query Language)
+PromQL is the language used to query and calculate metrics from TSDB.
+promql# Current CPU usage per pod
+rate(container_cpu_usage_seconds_total[5m])
+
+# HTTP error rate
+rate(http_requests_total{status=~"5.."}[5m])
+
+# Memory usage in MB
+container_memory_usage_bytes / 1024 / 1024
+
+# Pod restart count
+kube_pod_container_status_restarts_total
+Grafana uses PromQL to build dashboards. Alertmanager uses PromQL to evaluate alert rules.
+
+6. Alertmanager
+Receives alerts from Prometheus and routes them to the right receiver.
+Prometheus evaluates alert rule every 15s
+       ↓
+Rule fires → sends alert to Alertmanager
+       ↓
+Alertmanager routes based on labels
+       ↓
+Sends to Slack / Email / PagerDuty
+
+7. Grafana
+Connects to Prometheus as a data source and visualizes metrics as dashboards.
+Grafana → runs PromQL query → gets data from Prometheus → shows graph
+
+Push vs Pull — Why Prometheus uses Pull
+PushPullWho initiatesApp pushes to serverServer pulls from appExampleCloudWatch AgentPrometheusAdvantageWorks behind firewallServer controls scrape rateDisadvantageApp needs server addressTarget must be reachable
+
+In Your Project
+Node Exporter      → installed on EKS nodes → exposes CPU/memory/disk
+kube-state-metrics → watches K8s API → exposes pod/deployment metrics
+Prometheus         → scrapes both every 15s → stores in TSDB
+PromQL             → queries like "show CPU of backend pod last 30 min"
+Grafana            → shows dashboards using those queries
+Alertmanager       → alerts Slack if backend pod restarts more than 3 times
+
+One Line Summary of Each Component
+Targets        → apps that expose /metrics endpoint
+Service Disc.  → Prometheus finds targets automatically in K8s
+Scraper        → pulls metrics from targets every 15s
+TSDB           → stores all metrics with timestamps
+PromQL         → query language to extract meaning from raw data
+Alertmanager   → routes fired alerts to Slack/email/PagerDuty
+Grafana        → visualizes metrics as graphs and dashboards
+Ready to go deeper into any component?You said: service discovery is a component where it is responsible for discovering target  pull data but in above example of k8s, k8s will automatically discover the tar…service discovery is a component where it is responsible for discovering target  pull data but in above example of k8s, k8s will automatically discover the target using annotation label etc10:09 AMClaude responded: Exactly right.Exactly right. Let me clarify this precisely:
+
+Service Discovery — Corrected Understanding
+Service Discovery is the component inside Prometheus that is responsible for finding and maintaining the list of targets to scrape.
+
+How it works in Kubernetes specifically
+In Kubernetes, Prometheus uses Kubernetes Service Discovery (kubernetes_sd_config) which talks directly to the Kubernetes API Server to discover targets automatically.
+Prometheus Service Discovery
+         │
+         ▼
+Kubernetes API Server
+         │
+         ├── Watches Pods
+         ├── Watches Services
+         ├── Watches Nodes
+         └── Watches Endpoints
+Kubernetes does NOT do the discovery — Prometheus asks Kubernetes API for the list of pods, nodes, services and uses labels and annotations to filter which ones to scrape.
+
+How Prometheus knows WHAT to scrape
+You tell Prometheus via annotations on your pod:
+yaml# In your pod spec
+annotations:
+  prometheus.io/scrape: "true"     # yes scrape this pod
+  prometheus.io/port: "8000"       # scrape on this port
+  prometheus.io/path: "/metrics"   # scrape this endpoint
+Prometheus Service Discovery sees this annotation → adds pod to scrape list → Scraper starts pulling from it.
+
+Simple Flow
+Pod starts in K8s
+       ↓
+Prometheus SD watches K8s API → sees new pod
+       ↓
+Checks annotation → prometheus.io/scrape: "true"
+       ↓
+Adds to active targets list
+       ↓
+Scraper pulls http://pod-ip:8000/metrics every 15s
+       ↓
+Data stored in TSDB
+
+Key Point for Interview
+Kubernetes   → does NOT discover targets
+Prometheus   → discovers targets BY talking to Kubernetes API
+Annotations  → tell Prometheus which pods to scrape
+Labels       → used to filter and organize metrics after scraping
+Good catch — that distinction is important and interviewers specifically ask this.
