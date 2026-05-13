@@ -1,0 +1,8 @@
+Logs say:
+Uvicorn running on http://0.0.0.0:80
+Probe hitting:
+http://192.168.2.149:8000  ← connection refused
+Uvicorn is running on port 80 but probes expect port 8000. Your Dockerfile CMD still has port 80.
+
+
+Front end service was missing Service so got "backend service is missing error" created service and fixed it after restart

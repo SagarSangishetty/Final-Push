@@ -1,0 +1,76 @@
+Load Balancer (LB) is a service that distributes incoming traffic across multiple targets (like EC2 instances, containers, or IPs) to ensure high availability
+
+
+When a user initiates a request from a browser, the data travels through the OSI model layers (L7 → L1), where each layer adds its own information (encapsulation), and then moves across the internet to the server.
+
+🔄 How Request Travels (Corrected Flow)
+
+🔹 L7 – Application Layer
+User interacts via browser
+Protocol is chosen: HTTP / HTTPS / FTP / SFTP
+Browser typically sends HTTP/HTTPS request
+🔹 L6 – Presentation Layer
+Handles encryption & decryption (SSL/TLS)
+Converts data format (e.g., JSON, encoding)
+🔹 L5 – Session Layer
+Establishes, maintains, and terminates session
+Example: session between client and server
+🔹 L4 – Transport Layer
+Uses TCP/UDP
+Breaks data into segments (not exactly “packets”)
+Ensures reliability (TCP handshake, retransmission)
+🔹 L3 – Network Layer
+Adds IP address
+Determines routing path across networks (via routers)
+🔹 L2 – Data Link Layer
+Works with MAC address
+Frames are transferred within local network (switches)
+🔹 L1 – Physical Layer
+Actual transmission via cables, fiber, signals
+
+------------------------------------
+
+Works at Layer 7 (Application Layer)
+Handles HTTP / HTTPS traffic
+Understands request content (URL, headers, host)
+🔥 Routing Capabilities
+✅ Path-based routing
+/payment → Payment service
+/transaction → Transaction service
+✅ Host-based (domain) routing
+api.example.com vs admin.example.com
+✅ Header-based routing
+⚠️ Weighted routing (not “ratio-based”)
+→ Used for traffic splitting (e.g., 80% → v1, 20% → v2)
+
+
+NLB : 
+Works at Layer 4 (Transport Layer)
+Handles TCP / UDP traffic
+Does NOT inspect HTTP content	
+
+Key Features
+⚡ Ultra low latency & high throughput
+⚡ Handles millions of requests per second
+✅ Uses IP + Port (connection-based routing) Protocol (TCP/UDP)
+✅ Provides static IP / Elastic IP support
+
+
+Gateway Load Balancer (GWLB) : 
+
+Is used to deploy, scale, and manage third-party network appliances like firewalls, intrusion detection/prevention systems, and deep packet inspection tools.
+
+Traffic is routed to GWLB
+GWLB forwards it to security appliances (firewall, IDS/IPS)
+Appliances inspect traffic
+Traffic is sent back to GWLB → then to destination
+
+Works at Layer 3 (Network layer focus)
+Uses GENEVE protocol to forward traffic
+Routes traffic based on flow (5-tuple):
+Source IP
+Destination IP
+Source Port
+Destination Port
+Protocol
+																																														

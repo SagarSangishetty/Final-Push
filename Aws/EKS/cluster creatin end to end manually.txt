@@ -1,0 +1,144 @@
+Create VPC (Foundation)
+
+VPC (10.0.0.0/16)
+2 Public subnets (for ALB)
+2 Private subnets (for EKS nodes)
+Internet Gateway (IGW)
+NAT Gateway
+Route tables
+EKS subnet tags
+
+🚀 Step 1: Create VPC
+aws ec2 create-vpc \
+  --cidr-block 10.0.0.0/16 \
+  --region ap-south-1
+
+👉 Save the VpcId
+
+Enable DNS (important for EKS):
+
+aws ec2 modify-vpc-attribute --vpc-id <VPC-ID> --enable-dns-support
+aws ec2 modify-vpc-attribute --vpc-id <VPC-ID> --enable-dns-hostnames
+
+🌐 Step 2: Create Subnets (2 AZ setup)
+Public Subnets
+aws ec2 create-subnet \
+  --vpc-id <VPC-ID> \
+  --cidr-block 10.0.1.0/24 \
+  --availability-zone ap-south-1a
+aws ec2 create-subnet \
+  --vpc-id <VPC-ID> \
+  --cidr-block 10.0.2.0/24 \
+  --availability-zone ap-south-1b
+Private Subnets
+aws ec2 create-subnet \
+  --vpc-id <VPC-ID> \
+  --cidr-block 10.0.3.0/24 \
+  --availability-zone ap-south-1a
+aws ec2 create-subnet \
+  --vpc-id <VPC-ID> \
+  --cidr-block 10.0.4.0/24 \
+  --availability-zone ap-south-1b
+
+👉 Save all subnet IDs
+
+🌍 Step 3: Internet Gateway (for public access)
+aws ec2 create-internet-gateway
+
+Attach to VPC:
+
+aws ec2 attach-internet-gateway \
+  --vpc-id <VPC-ID> \
+  --internet-gateway-id <IGW-ID>
+
+📡 Step 4: Public Route Table
+aws ec2 create-route-table --vpc-id <VPC-ID>
+
+Add route to internet:
+
+aws ec2 create-route \
+  --route-table-id <RT-ID> \
+  --destination-cidr-block 0.0.0.0/0 \
+  --gateway-id <IGW-ID>
+
+Associate with public subnets:
+
+aws ec2 associate-route-table --subnet-id <PUBLIC-SUBNET-1> --route-table-id <RT-ID>
+aws ec2 associate-route-table --subnet-id <PUBLIC-SUBNET-2> --route-table-id <RT-ID>
+
+🔐 Step 5: NAT Gateway (for private subnet internet access)
+Allocate Elastic IP:
+aws ec2 allocate-address --domain vpc
+
+Create NAT in public subnet:
+aws ec2 create-nat-gateway \
+  --subnet-id <PUBLIC-SUBNET-1> \
+  --allocation-id <EIP-ALLOC-ID>
+
+⏳ Wait until NAT becomes available
+
+🔁 Step 6: Private Route Table
+aws ec2 create-route-table --vpc-id <VPC-ID>
+
+Add route via NAT:
+
+aws ec2 create-route \
+  --route-table-id <PRIVATE-RT-ID> \
+  --destination-cidr-block 0.0.0.0/0 \
+  --nat-gateway-id <NAT-ID>
+
+Associate:
+
+aws ec2 associate-route-table --subnet-id <PRIVATE-SUBNET-1> --route-table-id <PRIVATE-RT-ID>
+aws ec2 associate-route-table --subnet-id <PRIVATE-SUBNET-2> --route-table-id <PRIVATE-RT-ID>
+
+Step 7: Add EKS Required Tags (VERY IMPORTANT)
+Replace <cluster-name> with your EKS cluster name
+Tag ALL subnets:
+aws ec2 create-tags --resources <SUBNET-ID> \
+  --tags Key=kubernetes.io/cluster/<cluster-name>,Value=shared
+Tag public subnets:
+aws ec2 create-tags --resources <PUBLIC-SUBNET-ID> \
+  --tags Key=kubernetes.io/role/elb,Value=1
+Tag private subnets:
+aws ec2 create-tags --resources <PRIVATE-SUBNET-ID> \
+  --tags Key=kubernetes.io/role/internal-elb,Value=1
+
+----------------------------------------------------------------------------
+
+Next step: IAM Roles (very important)
+
+Why this step matters
+
+In Amazon EKS:
+
+Control plane needs permission to manage AWS resources
+Worker nodes need permission to:
+Join cluster
+Pull images from ECR
+Attach networking
+
+-----------------------------------------------------------------------------
+
+🚀 Next step: Create Node Role
+
+AWS Service → EC2
+
+Policy
+
+AmazonEKSWorkerNodePolicy
+AmazonEC2ContainerRegistryReadOnly
+AmazonEKS_CNI_Policy
+
+----------------------------------------------------------------
+
+🚀 Step: Create EKS Cluster (Control Plane)
+
+🚀 Next step: Create Node Group
+
+👉 EKS → Your cluster → Compute tab → Add Node Group
+
+Now you can start deploying application
+
+
+

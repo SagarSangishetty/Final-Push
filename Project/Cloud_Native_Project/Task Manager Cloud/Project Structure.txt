@@ -1,0 +1,22 @@
+devops-app/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app entry
+│   │   ├── core/database.py     # SQLAlchemy + DB health check
+│   │   ├── models/task.py       # Task table
+│   │   └── api/
+│   │       ├── health.py        # /live /ready /startup probes
+│   │       └── tasks.py         # CRUD endpoints
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx              # React UI (fetches /api/tasks)
+│   │   └── App.css
+│   ├── nginx.conf               # Proxies /api/ → backend-service
+│   └── Dockerfile
+└── k8s/base/
+    ├── backend-deployment.yaml  # 3 probes wired to /api/health/*
+    ├── frontend-deployment.yaml # liveness + readiness on /health
+    ├── ingress.yaml             # ALB + ACM + HTTPS redirect
+    └── irsa-and-secrets.yaml    # ServiceAccount + ExternalSecret

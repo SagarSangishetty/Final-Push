@@ -1,0 +1,16 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: cpu-load-cluster
+  region: us-east-1
+
+nodeGroups:
+  - name: ng-1
+    instanceType: t3.micro
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 4
+    ssh:
+      allow: true
+      publicKeyName: us-east-1   # <-- EC2 key pair name (NOT file path)

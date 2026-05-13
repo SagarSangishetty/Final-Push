@@ -1,0 +1,6 @@
+Health Checks — Built In
+The backend has 3 separate probe endpoints, each serving a specific Kubernetes purpose:
+
+/api/health/startup → Startup probe. Gives the app 60s to initialize before liveness begins. Important if you run DB migrations on boot.
+/api/health/live → Liveness probe. If this fails, pod restarts. Checks only that the process is running.
+/api/health/ready → Readiness probe. Actively pings RDS (SELECT 1). If RDS is unreachable, this returns 503 and the pod is pulled out of the ALB target group — no traffic is sent to it.
