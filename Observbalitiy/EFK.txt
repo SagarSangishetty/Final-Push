@@ -1,0 +1,157 @@
+===========================================
+EFK STACK - LOGGING IN KUBERNETES
+===========================================
+
+PURPOSE
+--------
+EFK is used for centralised logging in Kubernetes.
+Instead of SSHing into each pod to check logs,
+all logs are collected and stored in one place.
+
+===========================================
+COMPONENTS
+===========================================
+
+1. FLUENTBIT (Collector)
+-------------------------
+- Runs as DaemonSet (one pod per node)
+- Reads logs from every pod on that node
+- Lightweight log forwarder
+- Forwards logs to Elasticsearch
+- Can filter, parse, transform logs before sending
+
+  Where it reads logs from:
+  /var/log/containers/*.log  (node level log path)
+  All pod logs land here on the node filesystem
+
+2. ELASTICSEARCH (Storage)
+---------------------------
+- Stores all log messages in its database
+- It is a distributed search and analytics engine
+- Indexes logs so they are searchable
+- Stores logs as JSON documents
+- Has its own query language (similar to PromQL concept)
+
+3. KIBANA (Visualisation)
+--------------------------
+- UI dashboard on top of Elasticsearch
+- Query and search logs
+- Create visualisations and dashboards
+- Filter logs by time, pod name, namespace etc
+- Similar to how Grafana sits on top of Prometheus
+
+===========================================
+FLOW
+===========================================
+
+Pod generates logs (stdout/stderr)
+        ↓
+Logs written to node filesystem
+/var/log/containers/
+        ↓
+Fluentbit (DaemonSet) reads from node
+        ↓
+Forwards to Elasticsearch
+        ↓
+Kibana queries Elasticsearch
+and visualises logs
+
+===========================================
+COMPARISON WITH PROMETHEUS STACK
+===========================================
+
+Purpose       | Prometheus Stack    | EFK Stack
+--------------|---------------------|------------------
+What          | Metrics             | Logs
+Collector     | Node Exporter       | Fluentbit
+              | (DaemonSet)         | (DaemonSet)
+Storage       | Prometheus TSDB     | Elasticsearch
+Visualisation | Grafana             | Kibana
+Query UI      | PromQL              | Kibana Query
+
+===========================================
+KEY POINT
+===========================================
+
+Prometheus  → tells you WHAT is happening
+              (CPU high, memory high)
+
+EFK         → tells you WHY it is happening
+              (error logs, stack traces, exceptions)
+
+Both together = complete observability
+
+===========================================
+
+
+===========================================
+FLUENTBIT - 6 CONFIGURATION SECTIONS
+===========================================
+
+1. SERVICE
+-----------
+- Global settings for Fluentbit
+- Example: log level, flush interval
+- How frequently logs are flushed to output
+
+2. INPUT
+---------
+- Where Fluentbit reads logs from
+- Sources: tail (files), systemd, http
+- In K8s reads from:
+  /var/log/containers/*.log (node filesystem)
+
+3. PARSER
+----------
+- How to parse raw log text into structured fields
+- Raw log is just a string — parser breaks it into
+  JSON fields (timestamp, level, message etc)
+- Example: parse nginx log format into fields
+
+4. FILTER
+----------
+- Modify, enrich or drop logs before sending
+- Example:
+  - Add namespace, pod name to log record
+  - Drop debug logs
+  - Modify field values
+
+5. BUFFER
+----------
+- Temporary storage between input and output
+- Used when Elasticsearch is slow or down
+- Prevents log loss during outages
+- Can be memory based or filesystem based
+
+6. OUTPUT
+----------
+- Where to send the logs
+- Destinations: Elasticsearch, S3, Splunk, Stdout
+- In EFK stack → Elasticsearch
+
+===========================================
+FLOW
+===========================================
+
+Input (collect from node)
+    ↓
+Parser (structure raw text into JSON)
+    ↓
+Filter (modify / enrich / drop)
+    ↓
+Buffer (temporary hold if output slow)
+    ↓
+Output (send to Elasticsearch)
+
+===========================================
+SIMPLE ANALOGY
+===========================================
+
+Service  → Factory settings
+Input    → Raw material coming in
+Parser   → Breaking raw material into parts
+Filter   → Quality check, remove unwanted
+Buffer   → Temporary warehouse
+Output   → Dispatch to destination
+
+===========================================
