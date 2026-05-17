@@ -4,7 +4,7 @@ metadata:
   name: application
   namespace: cpu-load
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: app
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app-container
-        image: 169976490560.dkr.ecr.us-east-1.amazonaws.com/cpu-load-registery:01
+        image: shettysagar272/cpu-load:01
         ports:
         - containerPort: 80
         

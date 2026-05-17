@@ -1,0 +1,38 @@
+1. Default Kubernetes / Container Metrics
+
+These come automatically from:
+
+Kubelet
+cAdvisor
+Node Exporter
+kube-state-metrics
+
+Prometheus scrapes them automatically.
+
+You do NOT need to code anything in your app.
+
+These Metrics Include
+Node Exporter
+
+Node/server metrics:
+
+CPU
+RAM
+Disk
+Network
+kube-state-metrics
+
+Kubernetes object state:
+
+pod status
+deployment replicas
+node conditions
+restart counts
+kubelet/cAdvisor
+
+Container & pod metrics:
+
+pod CPU usage
+pod memory usage
+filesystem usage
+network usage

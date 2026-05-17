@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+
+metadata:
+  name: cpu-load-alert
+  namespace: monitoring
+  labels:
+    release: monitoring
+
+spec:
+  groups:
+  - name: cpu-load.rules
+    rules:
+
+    - alert: HighCPULoad
+
+      expr: |
+        sum by (pod, namespace) (
+          rate(
+            container_cpu_usage_seconds_total{
+              namespace="cpu-load"
+            }[1m]
+          )
+         ) > 0.001
+
+
+      labels:
+        severity: warning
+
+      annotations:
+        summary: "High CPU usage on pod"        
+        description: "Chutiye Pod CPU usage exceeded ho ra hai dhyan de nai to nikal duga job se rat "
