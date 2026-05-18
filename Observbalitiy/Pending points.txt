@@ -1,0 +1,24 @@
+To reach 8.5/10 — Do These 3 Things
+1. Write 5 PromQL queries in Prometheus UI
+promql# CPU usage of cpu-load pods
+rate(container_cpu_usage_seconds_total{namespace="cpu-load"}[5m])
+
+# Memory usage
+container_memory_usage_bytes{namespace="cpu-load"}
+
+# Pod restarts
+kube_pod_container_status_restarts_total{namespace="cpu-load"}
+
+# Network received
+rate(container_network_receive_bytes_total{namespace="cpu-load"}[5m])
+
+# Running pods count
+kube_pod_status_ready{namespace="cpu-load"}
+2. Build one Grafana dashboard with 4 panels:
+Panel 1 → CPU usage graph
+Panel 2 → Memory usage graph
+Panel 3 → Pod restart count
+Panel 4 → Network traffic
+3. Create one Kibana visualization
+Go to → Analytics → Visualize Library → Create
+Bar chart showing → log count per hour for cpu-load namespace

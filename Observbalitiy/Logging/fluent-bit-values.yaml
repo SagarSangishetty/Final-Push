@@ -1,0 +1,42 @@
+config:
+  service: |
+    [SERVICE]
+        Flush 1
+        Daemon Off
+        Log_Level info
+        Parsers_File parsers.conf
+
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*cpu-load*.log
+        Parser docker
+        Tag kube.*
+        Refresh_Interval 5
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude Off
+
+  outputs: |
+    [OUTPUT]
+        Name es
+        Match *
+        Host elasticsearch-master.logging.svc.cluster.local
+        Port 9200
+        HTTP_User elastic
+        HTTP_Passwd W1a4c7vwfNKj8HEt
+        tls On
+        tls.verify Off
+        tls.debug 1
+        Logstash_Format On
+        Suppress_Type_Name On
+        Generate_ID On
+        Retry_Limit False

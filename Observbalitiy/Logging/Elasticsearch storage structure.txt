@@ -1,0 +1,13 @@
+/var/lib/elasticsearch/
+
+
+Elasticsearch stores JSON documents
+
+Example log:
+
+{
+  "timestamp": "2026-05-18",
+  "level": "ERROR",
+  "pod": "frontend",
+  "message": "Authentication failed"
+}
