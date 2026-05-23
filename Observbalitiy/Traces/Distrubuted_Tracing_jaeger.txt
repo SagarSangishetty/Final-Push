@@ -1,0 +1,47 @@
+Traces
+
+Distributed tracing is an observability technique used to track a request across multiple services and measure latency at each hop to identify bottlenecks, failures, or performance issues.”
+
+Common tracing tools:
+
+Jaeger
+Zipkin
+OpenTelemetry
+Grafana Tempo
+
+It helps answer questions like:
+
+Which service handled the request?
+Where did the delay happen?
+Which component failed?
+How much time was spent at each step?
+
+Example flow:
+
+User Request
+   ↓ 20ms
+API Gateway
+   ↓ 50ms
+Auth Service
+   ↓ 200ms  ← latency issue here
+Payment Service
+   ↓ 30ms
+Database
+
+-----------------------------------
+
+How traces works  --- 
+
+2 parts 
+1. Developer needs to instrument the tarces (using open telemetry (helps write tarces))
+2. Devops enng needs to implement the traces using tools like jaeger
+
+Jaeger -- Working
+
+4 Components 
+1. Agents -- Gets the trace only if the developers have written the trace using open telementry
+2. Collector -- Receive trace from agent and process them
+3. DB -- You need to configure the DB by default it will not come with DB (ex DB you can use in elastic search DB)
+4. UI -- Displays the info from DB to the user.
+
+
