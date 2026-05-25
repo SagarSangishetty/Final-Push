@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: observability-demo-app
+  namespace: demo
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: observability-demo-app
+
+  template:
+    metadata:
+      labels:
+        app: observability-demo-app
+
+    spec:
+      containers:
+        - name: app
+          image: shettysagar272/observability:latest
+
+          ports:
+            - containerPort: 8000

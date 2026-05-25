@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+
+metadata:
+  name: observability-demo-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+
+spec:
+  groups:
+    - name: demo-app-alerts
+
+      rules:
+        - alert: DemoAppDown
+
+          expr: up{job="observability-demo-app"} == 0
+
+          for: 5s
+
+          labels:
+            severity: critical
+
+          annotations:
+            summary: "Demo application is down"
+            description: "Prometheus cannot scrape the demo app"

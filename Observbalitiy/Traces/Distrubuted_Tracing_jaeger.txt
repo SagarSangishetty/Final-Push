@@ -39,9 +39,23 @@ How traces works  ---
 Jaeger -- Working
 
 4 Components 
-1. Agents -- Gets the trace only if the developers have written the trace using open telementry
+1. Agents -- Gets the trace only if the developers have written the trace using open telemetry
 2. Collector -- Receive trace from agent and process them
 3. DB -- You need to configure the DB by default it will not come with DB (ex DB you can use in elastic search DB)
 4. UI -- Displays the info from DB to the user.
+
+-----------------Flow --------------
+
+Application
+    ↓
+OTel SDK
+    ↓
+OTel Collector
+    ↓
+Jaeger Collector
+    ↓
+Storage Backend
+    ↓
+Jaeger UI
 
 
