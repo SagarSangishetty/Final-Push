@@ -1,0 +1,69 @@
+1. Application Side
+
+Expose metrics endpoint:
+
+/metrics
+2. Kubernetes Service
+
+Create Service for application.
+
+kind: Service
+
+Purpose:
+
+stable network endpoint
+exposes application internally
+3. ServiceMonitor
+
+Create ServiceMonitor CRD.
+
+kind: ServiceMonitor
+
+Purpose:
+
+tells Prometheus what to scrape
+defines:
+service labels
+metrics path
+scrape interval
+port
+
+Example:
+
+endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
+Prometheus Operator Role
+
+Prometheus Operator watches:
+
+CRD	Purpose
+ServiceMonitor	scrape configs
+PodMonitor	pod scraping
+PrometheusRule	alert rules
+AlertmanagerConfig	alert routing
+
+Operator automatically updates Prometheus configuration.
+
+No manual prometheus.yml editing needed.
+
+Grafana Flow
+One-Time Manual Step
+
+Add Prometheus datasource in Grafana.
+
+Example:
+
+http://monitoring-kube-prometheus-prometheus:9090
+Grafana Role
+
+Grafana:
+
+sends PromQL queries
+receives results from Prometheus
+visualizes dashboards
+
+Grafana does NOT store metrics.
+
+Prometheus is the actual TSDB.

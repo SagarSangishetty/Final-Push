@@ -1,0 +1,59 @@
+| Component               | One-Line Purpose                         | Kubernetes Object    | Needs PVC/PV? | Why?                           |
+| ----------------------- | ---------------------------------------- | -------------------- | ------------- | ------------------------------ |
+| Prometheus              | Scrapes and stores time-series metrics   | StatefulSet          | ✅ YES         | Stores metrics TSDB            |
+| Grafana                 | Visualizes metrics using dashboards      | Deployment           | ✅ YES         | Stores dashboards/settings     |
+| Alertmanager            | Sends alerts to mail/Slack/etc           | StatefulSet          | ✅ Recommended | Stores silences/grouping state |
+| Node Exporter           | Exposes node CPU/memory/disk metrics     | DaemonSet            | ❌ No          | Stateless exporter             |
+| kube-state-metrics      | Exposes Kubernetes object metrics        | Deployment           | ❌ No          | Reads K8s API only             |
+| Prometheus Operator     | Manages ServiceMonitor/Prometheus CRDs   | Deployment           | ❌ No          | Control plane/operator only    |
+| Demo Application        | Business application exposing `/metrics` | Deployment           | ❌ Usually No  | Stateless app                  |
+| Fluent Bit              | Collects container logs from nodes       | DaemonSet            | ❌ No          | Forwarder only                 |
+| Elasticsearch           | Stores centralized logs                  | StatefulSet          | ✅ YES         | Log database                   |
+| Kibana                  | UI for searching logs                    | Deployment           | Optional      | Stores saved searches/settings |
+| Jaeger                  | Visualizes distributed traces            | Deployment           | Depends       | Needs storage backend          |
+| OpenTelemetry Collector | Receives/processes traces/metrics/logs   | Deployment/DaemonSet | ❌ No          | Telemetry pipeline             |
+
+
+
+| Component           | K8s Object  | Stateful or Stateless?               | Why This Object Is Used                                                                |
+| ------------------- | ----------- | ------------------------------------ | -------------------------------------------------------------------------------------- |
+| Prometheus          | StatefulSet | Stateful                             | Prometheus stores metrics TSDB on disk, so it needs stable storage and stable identity |
+| Grafana             | Deployment  | Mostly Stateless + Persistent Config | Grafana mainly serves UI/API requests; persistence only needed for dashboards/settings |
+| Alertmanager        | StatefulSet | Stateful                             | Stores silences, alert grouping, HA cluster state                                      |
+| Node Exporter       | DaemonSet   | Stateless                            | Must run one pod on EVERY node to collect node metrics                                 |
+| kube-state-metrics  | Deployment  | Stateless                            | Reads Kubernetes API only; no local data storage                                       |
+| Prometheus Operator | Deployment  | Stateless                            | Controller/operator logic only; watches CRDs and reconciles resources                  |
+| Demo Application    | Deployment  | Stateless                            | Application serves requests only; no persistent local state         
+                   |
+
+
+
+Prometheus Targets Page  -- 
+
+This tells you:
+
+whether ServiceMonitor was discovered
+whether scrape is UP/DOWN
+connection errors
+timeout issues
+
+This is usually the MOST important debugging screen.
+-------------------------------------------------------------------
+
+Verify Prometheus Operator selector labels:
+
+Example:
+
+release: monitoring
+
+
+
+What This Label Actually Means
+
+It tells Prometheus Operator:
+
+which ServiceMonitor / PrometheusRule resources
+should be selected
+
+using label selectors
+
