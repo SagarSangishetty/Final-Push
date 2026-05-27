@@ -1,0 +1,46 @@
+STEP 1 — Create Namespaces
+
+kubectl create ns traces
+
+
+STEP 2 — Add Helm Repos
+helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
+
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+
+helm repo update
+
+STEP 3 — Create Jaeger Values File
+
+Create:
+
+jaeger-values.yaml
+
+Replace:
+
+YOUR_PASSWORD
+
+with your Elasticsearch password.
+
+STEP 4 — Install Jaeger
+helm install jaeger jaegertracing/jaeger \
+  -n traces \
+  -f jaeger-values.yaml
+
+
+STEP 5 — Verify Jaeger
+kubectl get pods -n traces
+
+Expected:
+
+jaeger-collector
+jaeger-query
+
+STEP 6 — Create OTEL Collector Values
+
+
+STEP 7 — Install OTEL Collector
+
+helm install otel-collector open-telemetry/opentelemetry-collector \
+  -n traces \
+  -f otel-values.yaml

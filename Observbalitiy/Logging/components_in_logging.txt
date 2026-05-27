@@ -1,0 +1,23 @@
+COMPONENT DEPLOYMENT TABLE
+=========================================================
+
++-------------------+---------------+-----------------------------------------------+--------------------------------------------------------------+
+| Component         | K8S Resource  | Purpose                                       | Why This Resource Type?                                      |
++-------------------+---------------+-----------------------------------------------+--------------------------------------------------------------+
+| Fluent Bit        | DaemonSet     | Collect logs from all Kubernetes nodes        | Needs to run on EVERY node to read local container logs      |
+| Elasticsearch     | StatefulSet   | Store and index logs                          | Needs stable storage, identity, and persistence              |
+| Kibana            | Deployment    | Visualize/search logs                         | Stateless UI application                                     |
+| Elasticsearch SVC | ClusterIP     | Internal communication                        | Allows Kibana & Fluent Bit to connect internally             |
++-------------------+---------------+-----------------------------------------------+--------------------------------------------------------------+
+
+
+
++-------------------+----------------------+-----------------------------+--------------------------------------------------+
+| Component         | Needs Storage?       | Storage Type                | Reason                                           |
++-------------------+----------------------+-----------------------------+--------------------------------------------------+
+| Fluent Bit        | No (Usually)         | Ephemeral Memory            | Only forwards logs, does not permanently store   |
+| Elasticsearch     | YES                  | Persistent Volume (PVC/PV)  | Stores and indexes logs permanently              |
+| Kibana            | No (Mostly)          | Optional                    | Stateless UI, mainly queries Elasticsearch       |
++-------------------+----------------------+-----------------------------+--------------------------------------------------+
+
+

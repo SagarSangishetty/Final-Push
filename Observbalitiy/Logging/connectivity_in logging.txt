@@ -1,0 +1,145 @@
+=========================================================
+FLUENT BIT → ELASTICSEARCH CONNECTION
+=========================================================
+
+Configured inside:
+------------------
+[OUTPUT] section
+
+Example:
+--------
+[OUTPUT]
+    Name es
+    Match *
+    Host elasticsearch-master.log.svc.cluster.local
+    Port 9200
+    HTTP_User elastic
+    HTTP_Passwd <password>
+    tls On
+    tls.verify Off
+
+Meaning:
+--------
+Host          → Elasticsearch Service DNS
+Port          → Elasticsearch port
+HTTP_User     → Elasticsearch username
+HTTP_Passwd   → Elasticsearch password
+tls On        → HTTPS communication enabled
+
+
+=========================================================
+HOW FLUENT BIT CONNECTS?
+=========================================================
+
+Fluent Bit Pod
+      ↓
+Kubernetes DNS resolves:
+elasticsearch-master.log.svc.cluster.local
+      ↓
+Elasticsearch Service
+      ↓
+Elasticsearch Pod
+
+
+=========================================================
+KIBANA → ELASTICSEARCH CONNECTION
+=========================================================
+
+Configured using:
+-----------------
+elasticsearchHosts
+
+Example:
+--------
+https://elasticsearch-master:9200
+
+OR
+
+https://elasticsearch-master.log.svc.cluster.local:9200
+
+Meaning:
+--------
+Kibana connects to Elasticsearch using:
+- Kubernetes Service DNS
+- HTTPS URL
+
+
+=========================================================
+HOW KIBANA CONNECTS?
+=========================================================
+
+Kibana Pod
+      ↓
+Kubernetes DNS resolves:
+elasticsearch-master
+      ↓
+Elasticsearch Service
+      ↓
+Elasticsearch Pod
+
+
+=========================================================
+IMPORTANT UNDERSTANDING
+=========================================================
+
+Both Fluent Bit and Kibana connect to:
+--------------------------------------
+Elasticsearch SERVICE
+
+NOT directly to Elasticsearch pod.
+
+Reason:
+-------
+- Stable networking
+- Pod restart handling
+- Service discovery
+- Load balancing
+
+
+=========================================================
+SERVICE DNS FORMAT
+=========================================================
+
+Short DNS:
+----------
+elasticsearch-master
+
+Full DNS:
+----------
+elasticsearch-master.log.svc.cluster.local
+
+Format:
+-------
+<service-name>.<namespace>.svc.cluster.local
+
+
+=========================================================
+VERY IMPORTANT INTERVIEW QUESTION
+=========================================================
+
+Q. How do Kibana and Fluent Bit discover Elasticsearch?
+--------------------------------------------------------
+Using Kubernetes Service DNS.
+
+Q. Why use Service instead of Pod IP?
+-------------------------------------
+Because Pod IP changes after restart,
+while Service provides stable endpoint.
+
+
+=========================================================
+FLOW SUMMARY
+=========================================================
+
+Fluent Bit:
+-----------
+[OUTPUT]
+Host + Port + User + Password + TLS
+        ↓
+Elasticsearch Service DNS
+
+Kibana:
+--------
+elasticsearchHosts URL
+        ↓
+Elasticsearch Service DNS

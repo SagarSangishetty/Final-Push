@@ -1,0 +1,73 @@
+Observability Components Connectivity Configuration
+1. Application → OTEL Collector
+Purpose
+
+Application sends traces to OTEL Collector using OTLP gRPC.
+
+Application Config
+OTLPSpanExporter(
+    endpoint="otel-collector-opentelemetry-collector.traces.svc.cluster.local:4317",
+    insecure=True
+)
+Connectivity
+Source	Destination	Port	Protocol
+Application Pod	OTEL Collector Service	4317	gRPC
+OTEL Collector Service DNS
+otel-collector-opentelemetry-collector.traces.svc.cluster.local
+2. OTEL Collector → Jaeger
+Purpose
+
+OTEL Collector exports traces to Jaeger Collector.
+
+OTEL Collector Config
+exporters:
+  otlp:
+    endpoint: jaeger.traces.svc.cluster.local:4317
+    tls:
+      insecure: true
+Connectivity
+Source	Destination	Port	Protocol
+OTEL Collector	Jaeger Collector	4317	OTLP gRPC
+Jaeger Service DNS
+jaeger.traces.svc.cluster.local
+3. Jaeger → Elasticsearch
+Purpose
+
+Jaeger stores traces in Elasticsearch.
+
+Jaeger Values Config
+storage:
+  type: elasticsearch
+
+elasticsearch:
+  host: elasticsearch-master.log.svc.cluster.local
+  port: 9200
+  scheme: http
+  user: elastic
+  password: "PASSWORD"
+Connectivity
+Source	Destination	Port	Protocol
+Jaeger Collector	Elasticsearch	9200	HTTP/REST
+Elasticsearch DNS
+elasticsearch-master.log.svc.cluster.local
+4. Jaeger UI → Elasticsearch
+Purpose
+
+Jaeger Query/UI fetches traces from Elasticsearch.
+
+Internal Connection
+
+Automatically handled by Jaeger configuration.
+
+Connectivity
+Source	Destination	Port
+Jaeger Query	Elasticsearch	9200
+5. User → Jaeger UI
+Purpose
+
+Access tracing dashboard.
+
+Port Forward
+kubectl port-forward svc/jaeger 16686:16686 -n traces
+Browser Access
+http://localhost:16686

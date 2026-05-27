@@ -25,7 +25,7 @@ trace.set_tracer_provider(
 tracer = trace.get_tracer(__name__)
 
 otlp_exporter = OTLPSpanExporter(
-    endpoint="otel-collector.monitoring.svc.cluster.local:4317",
+    endpoint="otel-collector-opentelemetry-collector.traces.svc.cluster.local:4317",
     insecure=True
 )
 

@@ -1,0 +1,7 @@
+| Component        | K8s Resource Type     | Why Used                            | Storage Needed? | Default Ports      |
+| ---------------- | --------------------- | ----------------------------------- | --------------- | ------------------ |
+| Application      | Deployment + Service  | Runs application replicas           | ❌               | App Port (8000)    |
+| OTEL Collector   | Deployment + Service  | Receives traces from apps           | ❌               | 4317, 4318         |
+| Jaeger Collector | Deployment + Service  | Collects traces from OTEL Collector | ❌               | 14250, 14268, 4317 |
+| Jaeger Query/UI  | Deployment + Service  | Trace visualization UI              | ❌               | 16686              |
+| Elasticsearch    | StatefulSet + Service | Persistent trace storage            | ✅               | 9200, 9300         |

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: shettysagar272/observability:latest
+          image: shettysagar272/observability-demo-app:01
 
           ports:
             - containerPort: 8000

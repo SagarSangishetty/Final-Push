@@ -1,0 +1,37 @@
+provisionDataStore:
+  cassandra: false
+  elasticsearch: false
+  kafka: false
+
+storage:
+  type: elasticsearch
+
+elasticsearch:
+  host: elasticsearch-master.log.svc.cluster.local
+  port: 9200
+  scheme: http
+  user: elastic
+  password: "54t7AL9l7DGZmrrm"
+
+collector:
+  enabled: true
+  service:
+    otlp:
+      grpc:
+        name: otlp-grpc
+        port: 4317
+
+query:
+  enabled: true
+
+agent:
+  enabled: false
+
+allInOne:
+  enabled: false
+
+ingester:
+  enabled: false
+
+hotrod:
+  enabled: false
