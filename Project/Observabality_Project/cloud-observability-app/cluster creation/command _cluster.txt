@@ -15,11 +15,25 @@ eksctl create cluster \
 
 What each flag does:
       Flag                                       Why
---region ap-south-1            Mumbai — closest to you, lower latency
+--region us-east-1            Mumbai — closest to you, lower latency
 --nodes 2                      Start with 2 fixed nodes
 --nodes-min/max                CA will scale between these
 --managed                      AWS manages node patching/updates
 --asg-access                   Needed for Cluster Autoscaler IAM
 --with-oidc                    Needed for External Secrets Operator + ALB Controller IAM
 --ssh-access                   So you can SSH into nodes if needed
+
+# Delete the cluster — this removes ALL resources, nodes, ALB, PVCs automatically
+eksctl delete cluster --name observability-cluster --region us-east-1
+
+
+# Confirm cluster gone
+eksctl get cluster --region us-east-1
+
+# Check no leftover load balancers (common cost leak)
+aws elbv2 describe-load-balancers --region us-east-1
+
+# Check no leftover EBS volumes
+aws ec2 describe-volumes --region us-east-1 \
+  --filters Name=status,Values=available
 
