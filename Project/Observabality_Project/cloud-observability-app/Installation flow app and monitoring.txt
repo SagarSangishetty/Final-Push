@@ -1,0 +1,25 @@
+EKS Cluster (eksctl)
+│
+├── External Secrets Operator (Helm)
+│   ├── IAM Policy → IAM Service Account (OIDC)
+│   ├── ClusterSecretStore
+│   └── ExternalSecret → pulls from AWS Secrets Manager → creates K8s Secret
+│
+├── namespace: monitoring
+│   ├── AWS Secrets Manager → prod/monitoring/grafana + prod/monitoring/alertmanager
+│   ├── ExternalSecret → monitoring-secrets (K8s Secret)
+│   ├── kube-prometheus-stack (Helm) → monitoring-values.yaml
+│   │   ├── Prometheus + PVC
+│   │   ├── Grafana + PVC → password from monitoring-secrets
+│   │   ├── Alertmanager + PVC → slack webhook from mounted secret file
+│   │   ├── kube-state-metrics
+│   │   └── node-exporter
+│   ├── ServiceMonitor → scrapes app namespace
+│   ├── PrometheusRule → alert-rules.yaml (namespace: app, label: release: monitoring)
+│   └── Ingress (group.name: observability-alb, order: 1)
+│
+├── namespace: app
+│   ├── FastAPI app (main.py)
+│   └── Ingress (group.name: observability-alb, order: 10)
+│
+└── ALB (single, shared via group.name)
