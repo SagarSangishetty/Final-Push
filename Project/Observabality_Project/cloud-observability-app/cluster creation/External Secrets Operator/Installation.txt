@@ -1,0 +1,118 @@
+External Secrets Operator Setup
+
+Step 1 — Install External Secrets Operator via Helm
+bashhelm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+
+helm install external-secrets external-secrets/external-secrets \
+  --namespace external-secrets \
+  --create-namespace
+Verify:
+kubectl get pods -n external-secrets
+# Should show 3 pods Running
+
+Step 2 — Create IAM Policy
+ESO needs permission to read from AWS Secrets Manager.
+cat > eso-policy.json << 'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+
+aws iam create-policy \
+  --policy-name ESOSecretsManagerPolicy \
+  --policy-document file://eso-policy.json
+Note down the Policy ARN from output — needed in next step.
+
+Step 3 — Create IAM Service Account
+This links your K8s ServiceAccount to AWS IAM using OIDC — so ESO pod can call AWS without hardcoded keys.
+eksctl create iamserviceaccount \
+  --name external-secrets-sa \
+  --namespace external-secrets \
+  --cluster observability-cluster \
+  --region ap-south-1 \
+  --attach-policy-arn <YOUR_POLICY_ARN_FROM_STEP_2> \
+  --approve \
+  --override-existing-serviceaccounts
+
+Step 4 — Create SecretStore
+This tells ESO where to fetch secrets from (AWS Secrets Manager, which region).
+yaml# secret-store.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: aws-secret-store
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: ap-south-1
+      auth:
+        jwt:
+          serviceAccountRef:
+            name: external-secrets-sa
+            namespace: external-secrets
+
+kubectl apply -f secret-store.yaml
+Verify:
+kubectl get clustersecretstore
+# STATUS should show Ready
+
+Step 5 — Store Grafana Password in AWS Secrets Manager
+aws secretsmanager create-secret \
+  --name prod/monitoring/grafana \
+  --region ap-south-1 \
+  --secret-string '{"adminPassword":"YourStrongPassword123"}'
+
+Step 6 — Create ExternalSecret for Grafana
+yaml# grafana-external-secret.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: grafana-secret
+  namespace: monitoring
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: grafana-secret
+  data:
+    - secretKey: adminPassword
+      remoteRef:
+        key: prod/monitoring/grafana
+        property: adminPassword
+kubectl create namespace monitoring
+kubectl apply -f grafana-external-secret.yaml
+Verify — this is the key check:
+kubectl get externalsecret -n monitoring
+# STATUS should show SecretSynced
+
+kubectl get secret grafana-secret -n monitoring
+# Should exist now — ESO created it automatically
+
+What Just Happened
+AWS Secrets Manager (prod/monitoring/grafana)
+            ↓  ESO reads it every 1h
+K8s Secret (grafana-secret) created in monitoring namespace
+            ↓  Grafana Helm will reference this
+Grafana pod gets password without it ever being in values.yaml
+
+Final Understanding
+Resource	          Purpose
+AWS Secret	        Actual sensitive data
+ClusterSecretStore	AWS connection/auth
+ExternalSecret	        Mapping/configuration
+Kubernetes Secret	Final generated secret
+Deployment	        Uses Kubernetes Secret

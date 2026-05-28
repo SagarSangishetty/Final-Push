@@ -1,0 +1,203 @@
+Working of Secretes in K8s & AWS
+
+# Working of Secrets in Kubernetes with AWS Secrets Manager
+
+## AWS Side
+
+### 1. Create Secret in AWS Secrets Manager
+
+* Store application secrets in AWS Secrets Manager.
+* Example:
+
+  * DB username/password
+  * API keys
+  * Slack webhook URL
+
+---
+
+### 2. Create IAM Policy
+
+* Create IAM policy with permission to access Secrets Manager secrets.
+* Example permissions:
+
+  ```json
+  secretsmanager:GetSecretValue
+  secretsmanager:DescribeSecret
+  ```
+
+---
+
+### 3. Configure IRSA (IAM Role for Service Account)
+
+* Create IAM Role and attach the Secrets Manager policy.
+* Link IAM Role with Kubernetes Service Account using IRSA.
+
+Important:
+
+* External Secrets Operator Service Account uses this IAM Role.
+* Service Account and External Secrets Operator should be in the same namespace.
+
+---
+
+# Kubernetes Side
+
+## 1. Deploy External Secrets Operator (ESO)
+
+* Deploy using Helm.
+* ESO installs CRDs like:
+
+  * ClusterSecretStore
+  * SecretStore
+  * ExternalSecret
+
+Example:
+
+```bash
+helm install external-secrets external-secrets/external-secrets \
+-n external-secrets \
+--create-namespace
+```
+
+---
+
+## 2. Create ClusterSecretStore
+
+* This tells Kubernetes how to connect to AWS Secrets Manager.
+* Contains:
+
+  * AWS region
+  * Service = SecretsManager
+  * IRSA Service Account reference
+
+Purpose:
+
+* Acts as bridge between Kubernetes and AWS Secrets Manager.
+
+---
+
+## 3. Create ExternalSecret
+
+* Created in application namespace.
+* Reads secret from AWS using ClusterSecretStore.
+* Automatically creates Kubernetes Secret.
+
+Flow:
+
+```text
+AWS Secrets Manager
+        ↓
+ClusterSecretStore
+        ↓
+ExternalSecret
+        ↓
+Kubernetes Secret
+```
+
+---
+
+# Validation Commands
+
+## Check External Secrets Operator Pods
+
+```bash
+kubectl get pods -n external-secrets
+```
+
+Expected:
+
+* Pods should be Running.
+
+Example:
+
+```text
+external-secrets
+external-secrets-webhook
+external-secrets-cert-controller
+```
+
+---
+
+## Validate ClusterSecretStore
+
+```bash
+kubectl get ClusterSecretStore
+```
+
+Expected:
+
+* STATUS = Valid
+* READY = True
+
+This means Kubernetes can connect to AWS Secrets Manager successfully.
+
+---
+
+## Validate ExternalSecret
+
+```bash
+kubectl get ExternalSecret -n monitoring
+```
+
+Expected:
+
+* STATUS = SecretSynced
+* READY = True
+
+This means External Secret successfully fetched secrets from AWS and created Kubernetes Secret.
+
+---
+
+## Verify Kubernetes Secret
+
+```bash
+kubectl get secret -n monitoring
+```
+
+You should see the Kubernetes Secret created automatically.
+
+
+
+
+How secret references work
+
+yaml
+grafana:
+  admin:
+    existingSecret: monitoring-secrets    # K8s secret name
+    passwordKey: adminPassword            # key inside that secret
+
+Grafana Helm chart has built-in support for reading from a K8s secret directly — so you just tell it secret name + key. Done.
+
+Alertmanager — Different mechanism
+Alertmanager does not have built-in secret reference like Grafana. So instead we mount the entire K8s secret as a file inside the pod.
+
+yaml
+alertmanager:
+  secrets:
+    - monitoring-secrets          # mounts this K8s secret as a folder inside pod
+This mounts it at:
+/etc/alertmanager/secrets/monitoring-secrets/adminPassword
+/etc/alertmanager/secrets/monitoring-secrets/slackWebhookUrl  ← each key becomes a file
+Then we tell alertmanager to read the webhook from that file path:
+
+yaml
+global:
+  slack_api_url_file: /etc/alertmanager/secrets/monitoring-secrets/slackWebhookUrl
+
+Side by Side
+Grafana                              Alertmanager
+──────────────────────               ──────────────────────
+K8s Secret                           K8s Secret
+    ↓                                    ↓
+Helm reads key directly              Mounted as file into pod
+    ↓                                    ↓
+Pod gets value as env var            /etc/alertmanager/secrets/
+                                     monitoring-secrets/
+                                     slackWebhookUrl  ← alertmanager reads this file
+
+Simple analogy
+
+Grafana = you hand someone a cheatsheet with the answer written on it
+Alertmanager = you put the cheatsheet in a drawer, tell them "go read drawer number 3"
+
+Both end up with the same value — just different delivery mechanisms.

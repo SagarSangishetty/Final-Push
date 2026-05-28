@@ -1,0 +1,30 @@
+# Prometheus Monitoring Notes
+
+* `rule` should be created in the **application namespace**.
+
+* `release` label should match the Helm release name.
+  Example:
+
+  ```yaml
+  release: monitoring
+  ```
+
+* Alertmanager config and Grafana datasource values are passed through:
+
+  ```yaml
+  monitoring-stack.yml
+  ```
+
+* Do not forget to create a `ServiceMonitor`.
+  Without it, Prometheus will not discover or scrape application metrics.
+
+* To troubleshoot scraping issues, check Prometheus targets page:
+
+  ```text
+  http://localhost:9090/targets
+  ```
+
+* Slack alert issue troubleshooting:
+
+  * `api_url_file` was not passed correctly in Alertmanager config.
+  * `#alerts` Slack channel was not created.

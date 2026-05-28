@@ -2,7 +2,8 @@ Dashboard 1 — Request Traffic Dashboard
 
 app_requests_total   --- total API calls
 
-rate(app_requests_total[1m])  --- traffic rate
+rate(app_requests_total[1m])  --- traffic rate (Traffic speed of your application) rate calculate average increase per second over last 1 minute(do chat gpt forbetter undertanding)
+
 
 increase(app_requests_total[5m])  -- requests in last 5 min
 

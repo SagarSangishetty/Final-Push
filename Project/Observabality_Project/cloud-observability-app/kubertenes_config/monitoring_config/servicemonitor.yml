@@ -1,0 +1,16 @@
+# servicemonitor-app.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: app-servicemonitor
+  namespace: app
+  labels:
+    release: monitoring        # must match Prometheus helm release name
+spec:
+  selector:
+    matchLabels:
+      app: observability-demo-app   # must match your app service label
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

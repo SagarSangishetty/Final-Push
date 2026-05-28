@@ -1,0 +1,124 @@
+# monitoring-values.yaml
+
+# ─────────────────────────────────────────────
+# GRAFANA
+# ─────────────────────────────────────────────
+grafana:
+  admin:
+    existingSecret: monitoring-secrets
+    passwordKey: adminPassword
+
+  persistence:
+    enabled: true
+    storageClassName: gp2
+    size: 5Gi
+
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s/grafana"
+      serve_from_sub_path: true
+
+# ─────────────────────────────────────────────
+# PROMETHEUS
+# ─────────────────────────────────────────────
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    replicas: 1
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+    podMonitorNamespaceSelector:
+      matchLabels: {}
+    serviceMonitorNamespaceSelector:
+      matchLabels: {}
+    ruleNamespaceSelector:
+      matchLabels: {}
+
+# ─────────────────────────────────────────────
+# ALERTMANAGER
+# ─────────────────────────────────────────────
+alertmanager:
+  alertmanagerSpec:
+    replicas: 1
+
+    # secrets mounted here — correct location
+    # mounts at /etc/alertmanager/secrets/monitoring-secrets/
+    secrets:
+      - monitoring-secrets
+
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+
+  config:
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: ["alertname", "namespace"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: slack-notifications
+      routes:
+        - matchers:
+            - severity="critical"
+          receiver: slack-notifications
+          group_wait: 10s
+          repeat_interval: 1h
+
+    receivers:
+      - name: slack-notifications
+        slack_configs:
+          - channel: "#alerts"
+            api_url_file: /etc/alertmanager/secrets/monitoring-secrets/slackWebhookUrl
+            send_resolved: true
+            title: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+            text: |
+              *Severity:* {{ .CommonLabels.severity }}
+              *Namespace:* {{ .CommonLabels.namespace }}
+              *Description:* {{ .CommonAnnotations.description }}
+
+# ─────────────────────────────────────────────
+# DEFAULT RULES
+# ─────────────────────────────────────────────
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: true
+    configReloaders: true
+    general: true
+    kubeApiserverAvailability: true
+    kubeApiserverBurnrate: true
+    kubeApiserverHistogram: true
+    kubeApiserverSlos: true
+    kubelet: true
+    kubeProxy: true
+    kubePrometheusGeneral: true
+    kubePrometheusNodeRecording: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeScheduler: true
+    kubeStateMetrics: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true

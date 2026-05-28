@@ -1,0 +1,74 @@
+Cluster & Namespace Layout
+eks-cluster
+├── namespace: app          → your FastAPI app
+├── namespace: monitoring   → Prometheus + Grafana
+├── namespace: logging      → EFK stack
+└── namespace: tracing      → OTel Collector + Jaeger
+Create all 4 namespaces first before deploying anything.
+
+ALB Ingress — Single ALB, Path-Based Routing
+Install AWS Load Balancer Controller on your EKS cluster first. Then create one Ingress resource in each namespace with path rules like:
+/          → app-service (namespace: app)
+/grafana   → grafana-service (namespace: monitoring)
+/kibana    → kibana-service (namespace: logging)
+/jaeger    → jaeger-query-service (namespace: tracing)
+
+Yes, one ALB can route to services across namespaces — achievable via annotations on the Ingress resource.
+
+
+AWS Secrets Manager — How It Works
+Install External Secrets Operator on your cluster. The flow is:
+AWS Secrets Manager (stores actual secret)
+        ↓
+External Secrets Operator (reads it)
+        ↓
+Creates a native Kubernetes Secret in your namespace
+        ↓
+Your pod mounts it as env var or volume
+Secrets you'll store in AWS Secrets Manager:
+SecretUsed ByElasticsearch passwordFluentbit config, Jaeger backend configGrafana admin passwordGrafana Helm valuesAny DB credentialsApp if you add one later
+Example instruction like yours → Fluentbit needs ES password, so store it in AWS Secrets Manager, External Secrets Operator syncs it as a K8s Secret in logging namespace, Fluentbit config references it as an env var FLUENT_ES_PASSWORD
+
+PVC / Storage — Where You Need It
+Component         Needs     PVC       ?Why           
+Elasticsearch      ✅      Yes     Stores all log and trace data 
+Grafana            ✅      Yes     Stores dashboards, datasource config 
+Prometheus         ✅      Yes     Stores metrics TSDB 
+Jaeger             ❌      No      Uses Elasticsearch as backend
+OTel Collector     ❌      No      Stateless, just forwards spans
+Fluentbit          ❌      No      Stateless, just forwards logs
+Your App           ❌      No      Stateless API
+
+Use AWS EBS (gp3) as your StorageClass for all PVCs — EKS provisions it automatically via the EBS CSI driver which you install once on the cluster.
+
+
+Helm — How to Deploy Each Component
+All of these have official Helm charts. Deploy order matters:
+1. AWS Load Balancer Controller   (cluster-wide)
+2. EBS CSI Driver                 (cluster-wide)
+3. External Secrets Operator      (cluster-wide)
+4. Elasticsearch → namespace: logging
+5. Fluentbit → namespace: logging
+6. Kibana → namespace: logging
+7. Prometheus + Grafana → namespace: monitoring
+8. OTel Collector → namespace: tracing
+9. Jaeger → namespace: tracing  (point backend to ES)
+10. Your App → namespace: app
+11. Ingress resource → per namespace
+
+Production Checklist Per Component
+
+Elasticsearch → set PVC size, set resources.requests (RAM minimum 2Gi), enable single-node mode for dev or 3-node for prod
+Prometheus → set retention period (e.g. 15d) + PVC
+Grafana → PVC for /var/lib/grafana, admin password from AWS Secret
+Fluentbit → no PVC, but config must point to ES service DNS + password from K8s Secret
+Jaeger → set --es.server-urls pointing to ES service in logging namespace
+
+
+Key Things to Research/Try Yourself
+
+How to install AWS Load Balancer Controller via Helm and what IAM policy it needs
+How External Secrets Operator SecretStore and ExternalSecret CRDs work
+How to install EBS CSI Driver and create a StorageClass for gp3
+How Jaeger Helm chart accepts Elasticsearch as storage backend via values
+How Fluentbit fluent-bit.conf OUTPUT section references env vars for ES auth

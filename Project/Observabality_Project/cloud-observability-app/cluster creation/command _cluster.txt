@@ -1,0 +1,25 @@
+eksctl create cluster \
+  --name observability-cluster \
+  --region us-east-1 \
+  --nodegroup-name standard-nodes \
+  --node-type m7i-flex.large \
+  --nodes 2 \
+  --nodes-min 2 \
+  --nodes-max 4 \
+  --managed \
+  --asg-access \
+  --with-oidc \
+  --ssh-access \
+  --ssh-public-key us-east-1
+
+
+What each flag does:
+      Flag                                       Why
+--region ap-south-1            Mumbai — closest to you, lower latency
+--nodes 2                      Start with 2 fixed nodes
+--nodes-min/max                CA will scale between these
+--managed                      AWS manages node patching/updates
+--asg-access                   Needed for Cluster Autoscaler IAM
+--with-oidc                    Needed for External Secrets Operator + ALB Controller IAM
+--ssh-access                   So you can SSH into nodes if needed
+

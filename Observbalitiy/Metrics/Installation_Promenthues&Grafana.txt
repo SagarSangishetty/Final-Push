@@ -41,6 +41,7 @@ helm install monitoring prometheus-community/kube-prometheus-stack \
 -n monitoring \
 -f ./custom_kube_prometheus_stack.yml                                        #---------You Need stack.yml file
 
+************Create service monitor************
 
 Step 5: Clean UP
 Uninstall helm chart:
