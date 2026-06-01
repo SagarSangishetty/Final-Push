@@ -44,4 +44,4 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set region=us-east-1 \
-  --set vpcId=vpc-09b4deb961870d38b
+  --set vpcId=vpc-0adb10b01a0684c85

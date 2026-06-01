@@ -1,0 +1,213 @@
+# Observability Project — Issues & Fixes (Interview Notes)
+
+---
+
+## EKS Cluster
+
+- `eksctl` failed first time — region defaulted to `us-east-1`, cluster was in `ap-south-1`
+- Fix: `aws configure set region ap-south-1` before running eksctl
+
+---
+
+## External Secrets Operator
+
+- `ClusterSecretStore` apply failed with "no matches for kind" — CRD API version changed
+- Installed version uses `external-secrets.io/v1` not `v1beta1`
+- Fix: always run `kubectl api-resources | grep secretstore` to confirm actual API version before applying
+
+---
+
+## ALB Ingress
+
+- `/grafana` path was returning FastAPI's `{"detail": "Not Found"}` instead of Grafana UI
+- Root cause: app Ingress had `path: /` which matched everything including `/grafana`
+- Fix: added `alb.ingress.kubernetes.io/group.order` annotation — monitoring ingress set to `1`, app ingress set to `10` so specific paths evaluated first
+- Without `group.name` annotation — each Ingress creates its own ALB (costly), always add `group.name` to share one ALB
+
+---
+
+## Prometheus
+
+- PrometheusRule was applied but alerts never appeared in Prometheus UI
+- Root cause: `release: monitoring` label missing on PrometheusRule — Prometheus only picks up rules with matching label
+- ServiceMonitor also needs `release: monitoring` label — without it Prometheus does not scrape the app
+- Always verify at `http://localhost:9090/targets` and `http://localhost:9090/alerts`
+
+---
+
+## Alertmanager
+
+- Alert fired but Slack notification failed with: `open /etc/alertmanager/secrets/monitoring-secrets/slackWebhookUrl: no such file or directory`
+- Two root causes:
+  - `secrets` block was duplicated in values.yaml — once under `alertmanagerSpec` (correct) and once under `alertmanager` (wrong)
+  - Field name was `slack_api_url_file` instead of correct `api_url_file`
+- Slack `#alerts` channel was not created — Slack silently drops messages to non-existent channels
+- Fix: remove duplicate `secrets` block, use `api_url_file`, create the channel before testing
+
+---
+
+## General Kubernetes
+
+- Cross-namespace Ingress not supported — Ingress can only route to services in its own namespace
+- Solution: one Ingress per namespace, all sharing same `group.name` for single ALB
+- `kubectl cache` can cause "resource mapping not found" errors even when CRDs exist — fix: `rm -rf ~/.kube/cache`
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# Issues Faced & Fixes Applied
+
+## 1. AWS Load Balancer Controller Pods Not Running
+
+### Issue
+
+AWS Load Balancer Controller pods were not starting properly because the required Service Account with IAM role (IRSA) was not created/configured correctly.
+
+### Impact
+
+* ALB Controller pods were failing/not loading.
+* Ingress resources were not provisioning AWS ALB.
+
+### Fix
+
+* Created IAM Policy for ALB Controller.
+* Created IAM Service Account using `eksctl`.
+* Attached the required IAM policy to the Service Account.
+* Reinstalled/restarted AWS Load Balancer Controller.
+
+---
+
+## 2. EBS CSI Driver Missing
+
+### Issue
+
+EBS CSI Driver was not installed in the EKS cluster.
+
+### Impact
+
+* PVC-backed pods remained in `Pending` state.
+* Persistent volumes were not getting provisioned.
+* No proper events/logs were generated for storage provisioning.
+
+### Fix
+
+* Installed AWS EBS CSI Driver in the cluster.
+* Verified StorageClass and PVC binding.
+* Pods successfully moved to `Running` state after volume attachment.
+
+---
+
+## 3. Kibana Readiness Probe Failure
+
+### Issue
+
+Kibana readiness probe was failing continuously.
+
+### Root Cause
+
+Kibana was configured with:
+
+```yaml
+server.basePath: "/kibana"
+```
+
+but the default readiness probe was checking:
+
+```text
+/
+```
+
+instead of:
+
+```text
+/kibana
+```
+
+### Impact
+
+* Kibana pod status remained `0/1 Running`.
+* ALB Target Group health checks failed.
+* `/kibana` endpoint returned `504 Gateway Timeout`.
+
+### Fix
+
+Updated Kibana health check path:
+
+```yaml
+healthCheckPath: "/kibana"
+```
+
+Also configured:
+
+```yaml
+server.basePath: "/kibana"
+server.rewriteBasePath: true
+```
+
+After redeployment, readiness probes started succeeding and Kibana became healthy.
+
+---
+
+## 4. AWS ALB / Target Group Duplication Conflict
+
+### Issue
+
+AWS Load Balancer Controller failed with:
+
+```text
+DuplicateTargetGroupName
+DuplicateLoadBalancerName
+```
+
+### Root Cause
+
+Ingress backend configuration was modified (service port changed from `9200` to `5601`) after ALB and Target Groups were already created.
+
+AWS ALB Controller generates deterministic resource names based on:
+
+* ingress
+* namespace
+* service
+* port
+
+Old AWS resources still existed with the previous configuration.
+
+### Impact
+
+* ALB reconciliation failed.
+* New ingress rules were not getting applied.
+* TargetGroupBinding conflicts occurred.
+* `/kibana` route failed with `504 Gateway Timeout`.
+
+### Fix
+
+Performed full cleanup of stale resources:
+
+#### Kubernetes Cleanup
+
+* Deleted ingress resources.
+* Removed stuck ingress finalizers if required.
+* Deleted stale `TargetGroupBinding` resources.
+
+#### AWS Cleanup
+
+Manually deleted:
+
+* Stale ALB
+* Stale Target Groups
+* Old Listener Rules
+
+After cleanup:
+
+* Re-applied ingress resources.
+* AWS Load Balancer Controller recreated ALB and Target Groups successfully.
+
+---
+
+# Key Learnings
+
+* ALB Controller heavily depends on IRSA configuration.
+* EBS CSI Driver is mandatory for PVC-backed workloads in EKS.
+* Base paths in Kibana require matching readiness/liveness probe paths.
+* AWS Load Balancer Controller can leave stale AWS resources during failed reconciliations.
+* Ingress changes involving service ports may require manual AWS cleanup.
+* `TargetGroupBinding` CRDs are tightly coupled with ALB lifecycle management.

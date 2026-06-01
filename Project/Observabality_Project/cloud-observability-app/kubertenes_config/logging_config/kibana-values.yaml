@@ -1,0 +1,21 @@
+imageTag: "8.5.1"
+
+elasticsearchHosts: "https://elasticsearch-master:9200"
+
+service:
+  type: ClusterIP
+
+kibanaConfig:
+  kibana.yml: |
+    server.basePath: "/kibana"
+    server.rewriteBasePath: true
+
+healthCheckPath: "/kibana"
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi

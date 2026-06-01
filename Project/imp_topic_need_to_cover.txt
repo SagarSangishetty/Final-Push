@@ -1,0 +1,2 @@
+Normal TLS (important concept) → HTTPS between browser and server
+                               → you should know this ✅

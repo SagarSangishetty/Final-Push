@@ -1,7 +1,7 @@
 External Secrets Operator Setup
 
 Step 1 — Install External Secrets Operator via Helm
-bashhelm repo add external-secrets https://charts.external-secrets.io
+helm repo add external-secrets https://charts.external-secrets.io
 helm repo update
 
 helm install external-secrets external-secrets/external-secrets \
@@ -40,8 +40,8 @@ eksctl create iamserviceaccount \
   --name external-secrets-sa \
   --namespace external-secrets \
   --cluster observability-cluster \
-  --region ap-south-1 \
-  --attach-policy-arn <YOUR_POLICY_ARN_FROM_STEP_2> \
+  --region us-east-1 \
+  --attach-policy-arn arn:aws:iam::169976490560:policy/ESOSecretsManagerPolicy \
   --approve \
   --override-existing-serviceaccounts
 

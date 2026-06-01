@@ -52,7 +52,7 @@ The password is base64 encoded, so it needs to be decoded before use.
 
 
 7) Install Kibana
-helm install kibana --set service.type=LoadBalancer elastic/kibana --set elasticsearchHosts="https://elasticsearch-master:9200" -n logging
+helm install kibana --set service.type=ClusterIP elastic/kibana --set elasticsearchHosts="https://elasticsearch-master:9200" -n logging
 Kibana provides a user-friendly interface for exploring and visualizing data stored in Elasticsearch.
 It is exposed as a LoadBalancer service, making it accessible from outside the cluster.
 Need to mention elastic search url and because of helm it will auto detect the username and password and ca certificate as well from secrects as env variable.
