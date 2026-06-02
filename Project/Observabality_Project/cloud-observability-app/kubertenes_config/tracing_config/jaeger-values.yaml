@@ -1,0 +1,51 @@
+provisionDataStore:
+  cassandra: false
+  elasticsearch:
+    enabled: false
+
+storage:
+  type: elasticsearch
+  elasticsearch:
+    host: elasticsearch-master.tracing.svc.cluster.local
+    port: 9200
+    scheme: http
+    usePassword: false
+
+collector:
+  enabled: true
+  replicas: 2
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+query:
+  enabled: true
+  replicas: 1
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+agent:
+  enabled: false
+
+ingester:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi

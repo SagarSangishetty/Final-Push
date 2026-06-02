@@ -12,9 +12,10 @@ from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
 
 # ─────────────────────────────────────────────
 # TRACING SETUP (OpenTelemetry → OTel Collector → Jaeger → Elastic)
@@ -28,11 +29,7 @@ tracer = trace.get_tracer(__name__)
 
 # Endpoint is read from env var — so Helm chart can override it without code change
 otlp_exporter = OTLPSpanExporter(
-    endpoint=os.getenv(
-        "OTEL_EXPORTER_ENDPOINT",
-        "otel-collector-opentelemetry-collector.traces.svc.cluster.local:4317"
-    ),
-    insecure=True  # no TLS inside cluster — fine for internal traffic
+    endpoint="http://otel-collector-opentelemetry-collector.traces.svc.cluster.local:4318/v1/traces"
 )
 
 trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))

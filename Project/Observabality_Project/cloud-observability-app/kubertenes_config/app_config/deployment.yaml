@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: 169976490560.dkr.ecr.us-east-1.amazonaws.com/observability:latest
+          image: 169976490560.dkr.ecr.us-east-1.amazonaws.com/observability:01
 
           ports:
             - containerPort: 8000

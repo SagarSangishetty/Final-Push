@@ -211,3 +211,61 @@ After cleanup:
 * AWS Load Balancer Controller can leave stale AWS resources during failed reconciliations.
 * Ingress changes involving service ports may require manual AWS cleanup.
 * `TargetGroupBinding` CRDs are tightly coupled with ALB lifecycle management.
+
+----------------------------------------------------------------------------------------------
+
+
+## Tracing Issue & Fix
+
+### Issue
+
+Application traces were not visible in Jaeger even though:
+
+* OTEL Collector was running
+* OTLP receivers were enabled
+* Metrics were successfully reaching the collector
+
+Collector logs showed the below error:
+
+```text
+unknown service opentelemetry.proto.collector.trace.v1.TraceService
+```
+
+### Root Cause
+
+The OTEL Collector exporter was configured to send OTLP traces to Jaeger port `14250`.
+
+```yaml
+exporters:
+  otlp:
+    endpoint: jaeger.traces.svc.cluster.local:14250
+```
+
+Port `14250` is Jaeger native gRPC and does not accept OTLP protocol traffic.
+
+This caused a protocol mismatch:
+
+* Collector exporter → OTLP
+* Jaeger endpoint → Jaeger gRPC
+
+### Fix
+
+Changed the collector exporter endpoint from `14250` to `4317`.
+
+```yaml
+exporters:
+  otlp:
+    endpoint: jaeger.traces.svc.cluster.local:4317
+    tls:
+      insecure: true
+```
+
+Port `4317` supports OTLP gRPC, which matches the collector OTLP exporter protocol.
+
+### Result
+
+After restarting the OTEL Collector:
+
+* Traces successfully reached Jaeger
+* Service became visible in Jaeger UI
+* End-to-end tracing started working correctly

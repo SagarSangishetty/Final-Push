@@ -1,0 +1,28 @@
+helm repo add elastic https://helm.elastic.co
+helm repo update
+
+helm install elasticsearch elastic/elasticsearch \
+  --namespace traces \
+  --set replicas=1 \
+  --set imageTag="8.5.1" \
+  --set volumeClaimTemplate.storageClassName=gp2 \
+  --set persistence.enabled=true \
+  --set "persistence.size=15Gi" \
+  --set "resources.requests.memory=2Gi" \
+  --set "resources.limits.memory=2Gi"
+
+
+helm install jaeger jaegertracing/jaeger \
+  --namespace traces \
+  -f jaeger-values.yaml
+
+kubectl get pods -n traces
+
+
+helm install otel-collector open-telemetry/opentelemetry-collector \
+  --namespace traces \
+  -f otel-collector-values.yaml
+
+kubectl get pods -n traces
+
+Create Service as well using Otel-collector-service
