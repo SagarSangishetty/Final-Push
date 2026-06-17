@@ -1,0 +1,24 @@
+namespace: monitoring
+├── Prometheus + Grafana
+└── Ingress at /grafana (order: 1)
+
+namespace: logging
+├── Elasticsearch (shared)
+├── Fluentbit (collects logs)
+├── Kibana (views logs)
+└── Ingress at /kibana (order: 2)
+
+namespace: tracing
+├── OTel Collector
+├── Jaeger (uses Elasticsearch for storage)
+└── Ingress at / (order: 0 or no order, Jaeger at root)
+
+namespace: app
+├── Your FastAPI app
+└── Ingress at / (order: 10)
+
+One ALB
+├── /grafana → Grafana
+├── /kibana → Kibana
+├── / (priority 0) → Jaeger
+└── / (priority 10) → App

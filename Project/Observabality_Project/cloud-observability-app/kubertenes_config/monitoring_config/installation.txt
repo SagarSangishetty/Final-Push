@@ -1,0 +1,7 @@
+# 3. Create ExternalSecret for credentials (if using AWS Secrets Manager)
+
+
+
+helm install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --values monitoring-values.yaml

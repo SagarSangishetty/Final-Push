@@ -1,0 +1,69 @@
+Generate Load
+bash# Simple loop — 50 requests with delay
+for i in {1..50}; do
+  curl http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/api/orders/$i
+  sleep 0.5
+done
+Or more aggressive (faster):
+bash# 100 requests, no delay
+for i in {1..100}; do
+  curl http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/api/orders/$i &
+done
+wait
+Or include error requests (trigger your 30% failure):
+bashfor i in {1..30}; do
+  curl http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/api/orders/$i
+  sleep 0.2
+done
+
+Then View Results Across All 3 Pillars
+1. METRICS (Grafana)
+http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/grafana
+
+Look for request rate spike in your dashboard
+Check latency, error rate graphs
+
+
+2. LOGS (Kibana)
+http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/kibana
+
+Discover → fluentbit-* index
+Filter: kubernetes.namespace_name: app
+See all logs with trace_id
+
+
+3. TRACES (Jaeger)
+http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/
+
+Service: observability-demo-app
+Click on a trace
+See full span waterfall (orders-processing, get-order spans)
+Copy trace_id from a span
+
+
+The Full Demo Flow
+bash# Terminal 1 — generate load
+for i in {1..50}; do
+  curl http://k8s-observabilityalb-379b5fbb05-406494480.us-east-1.elb.amazonaws.com/api/orders/$i
+  sleep 0.3
+done
+
+# Terminal 2 — while load runs, check:
+# 1. Grafana /grafana → see request spike
+# 2. Jaeger / → see traces appearing
+# 3. Kibana /kibana → filter by trace_id from Jaeger
+
+Interview Story You Can Tell
+"I generated 50 requests to /api/orders endpoint.
+
+Grafana showed request rate spike and p99 latency increase.
+
+I copied a trace_id from Jaeger showing full execution waterfall
+(HTTP request → orders-processing span → database query).
+
+Then I filtered Kibana logs by that same trace_id and saw 
+all 3 log lines with exact timestamps matching the trace spans.
+
+All three systems told the same story about the same request — 
+that's the power of distributed tracing."
+Run the curl loop now and share screenshots from all three — that's your interview demo ready! 🎯

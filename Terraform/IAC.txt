@@ -1,0 +1,45 @@
+Infrastructure as Code (IaC)
+
+What is IaC?
+
+Infrastructure as Code (IaC) is the practice of managing and provisioning infrastructure through code instead of manual configuration.
+
+Cloud-Specific IaC Tools
+AWS: AWS CloudFormation
+Azure: Azure Resource Manager (ARM Templates)
+Google Cloud: Uses deployment and infrastructure automation tools specific to GCP.
+Why Terraform?
+
+Terraform is one of the most widely used IaC tools because:
+
+Multi-Cloud Support
+Works across multiple cloud providers such as AWS, Azure, GCP, Kubernetes, VMware, and many others.
+Provides a single approach for managing infrastructure across different platforms.
+Declarative Configuration
+Uses HCL (HashiCorp Configuration Language), which is simple, readable, and easy to maintain.
+State Management
+Maintains the current state of infrastructure and compares it with the desired state to determine required changes.
+Reusable Modules
+Supports modules, enabling reusable and standardized infrastructure deployments.
+Large Ecosystem
+Extensive provider support and strong community adoption.
+
+Terraform Competitors
+Crossplane
+Pulumi
+AWS CloudFormation
+Azure Resource Manager (ARM)
+
+
+Interview Summary
+
+Why Terraform over CloudFormation or ARM?
+
+CloudFormation is AWS-specific.
+ARM is Azure-specific.
+Terraform provides a cloud-agnostic, multi-cloud approach, allowing infrastructure management across different providers using a single tool and a common language (HCL).
+
+Terraform Life Cycle -- terraform init , terraform plan , terraform apply , terraform destroy
+
+Terraform state file -- 
+It stores the current state and metadata of all resources created and managed by Terraform. Terraform uses this file to track infrastructure, compare the desired state with the actual state, and determine what changes need to be made.

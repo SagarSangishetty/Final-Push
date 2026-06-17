@@ -1,0 +1,35 @@
+Dashboard 1 — Request Traffic Dashboard
+
+app_requests_total   --- total API calls
+
+rate(app_requests_total[1m])  --- traffic rate (Traffic speed of your application) rate calculate average increase per second over last 1 minute(do chat gpt forbetter undertanding)
+
+
+increase(app_requests_total[5m])  -- requests in last 5 min
+
+
+Dashboard 2 — Latency Dashboard
+
+Panel 1 — Average Latency
+rate(app_request_latency_seconds_sum[1m])
+/						average response latency	
+rate(app_request_latency_seconds_count[1m])  
+
+
+Panel 2 — Total Requests Counted in Histogram
+app_request_latency_seconds_count  ----- Total Requests Counted in Histogram
+
+
+Panel 3 — 95th Percentile Latency
+
+MOST IMPORTANT production metric.
+
+histogram_quantile(
+  0.95,
+  rate(app_request_latency_seconds_bucket[1m])
+)
+
+Shows:
+
+slow requests
+user experience qualit79

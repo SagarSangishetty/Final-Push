@@ -1,3 +1,10 @@
 imp/
 secret.yml
 .env
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+backend_resource/
+terraform-compute/
+terraform-network/

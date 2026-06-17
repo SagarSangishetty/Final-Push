@@ -1,0 +1,60 @@
+Terraform Providers Notes
+=========================
+
+Providers
+---------
+- A Provider is a plugin that tells Terraform where and how to create resources.
+- Examples: AWS, Azure, Google Cloud, Kubernetes.
+- Terraform uses providers to communicate with cloud platforms through their APIs.
+
+Multi Region
+------------
+- We need to define multiple provider blocks, one for each region.
+
+Example:
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+provider "aws" {
+  alias  = "west"
+  region = "us-west-1"
+}
+
+- Alias is the key that helps Terraform identify which provider configuration should be used.
+- Resources can reference the required provider using the provider argument.
+
+Example:
+
+resource "aws_instance" "server_west" {
+  provider = aws.west
+  ...
+}
+
+Multi Cloud
+-----------
+- We need to define separate provider blocks for each cloud provider.
+
+Example:
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+provider "azurerm" {
+  features {}
+}
+
+- This allows Terraform to manage resources across multiple cloud platforms from a single configuration.
+
+Interview Answer
+----------------
+Provider:
+A provider is a plugin that enables Terraform to interact with cloud platforms and services. It tells Terraform where and how to create, modify, and destroy resources.
+
+Multi Region:
+Multiple provider blocks with aliases are used to deploy resources in different regions of the same cloud provider.
+
+Multi Cloud:
+Multiple provider blocks from different cloud providers are used to manage infrastructure across multiple clouds such as AWS, Azure, and GCP.

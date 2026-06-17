@@ -1,0 +1,61 @@
+Terraform Conditional Expressions Notes
+=======================================
+
+Conditional Expressions
+-----------------------
+- Conditional expressions are used to implement conditional logic within Terraform configurations.
+- They allow Terraform to choose between two values based on whether a condition is true or false.
+- Similar to the ternary operator used in many programming languages.
+
+Syntax
+------
+
+condition ? true_value : false_value
+
+Where:
+
+- condition   : An expression that evaluates to either true or false.
+- true_value  : The value returned if the condition is true.
+- false_value : The value returned if the condition is false.
+
+Example
+-------
+
+variable "environment" {
+  default = "prod"
+}
+
+instance_type = var.environment == "prod" ? "t3.medium" : "t2.micro"
+
+Explanation:
+- If the environment is "prod", Terraform will use "t3.medium".
+- Otherwise, Terraform will use "t2.micro".
+
+Common Use Cases
+----------------
+- Selecting instance types based on environment.
+- Enabling or disabling resources.
+- Assigning different tags based on conditions.
+- Choosing different configurations for Dev, Test, and Production environments.
+
+Benefits
+--------
+- Reduces code duplication.
+- Makes configurations more dynamic.
+- Improves code readability and maintainability.
+
+Interview Answer
+----------------
+Conditional expressions in Terraform are used to apply conditional logic within configurations. They evaluate a condition and return one value if the condition is true and another value if it is false.
+
+Syntax:
+condition ? true_value : false_value
+
+Example:
+var.environment == "prod" ? "t3.medium" : "t2.micro"
+
+This helps create dynamic and reusable Terraform configurations.
+
+One-line Interview Answer:
+
+A conditional expression in Terraform is used to implement if-else logic by evaluating a condition and returning one value when true and another when false using the syntax condition ? true_value : false_value.

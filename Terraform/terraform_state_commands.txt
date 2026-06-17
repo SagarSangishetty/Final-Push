@@ -1,0 +1,9 @@
+| Command                                     | Purpose                                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| `terraform state list`                      | Lists all resources tracked in the state file.                               |
+| `terraform state show <resource>`           | Displays detailed information about a specific resource in the state.        |
+| `terraform state mv <source> <destination>` | Moves/renames a resource in the state file without recreating it.            |
+| `terraform state rm <resource>`             | Removes a resource from the state file without deleting the actual resource. |
+| `terraform state pull`                      | Downloads and displays the current state from the backend.                   |
+| `terraform state push <file>`               | Uploads a local state file to the backend.                                   |
+| `terraform state replace-provider`          | Replaces provider references in the state file.                              |

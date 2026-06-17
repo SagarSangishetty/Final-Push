@@ -1,0 +1,70 @@
+Terraform Variables Notes
+=========================
+
+Variables
+---------
+- Variables are nothing but parameters that can be passed to Terraform scripts.
+- They make Terraform configurations reusable and flexible.
+- Instead of hardcoding values, we can use variables and provide values during execution.
+
+Types of Variables
+------------------
+
+1. Input Variables
+------------------
+- Input variables are used to pass information into a Terraform configuration.
+- They act as parameters for Terraform modules and scripts.
+
+Example:
+variable "instance_type" {
+  type = string
+}
+
+Usage:
+instance_type = "t2.micro"
+
+2. Output Variables
+-------------------
+- Output variables are used to display or export values after Terraform creates resources.
+- They help retrieve useful information such as Public IP, Instance ID, VPC ID, Load Balancer DNS Name, etc.
+
+Example:
+output "public_ip" {
+  value = aws_instance.web.public_ip
+}
+
+Result:
+Terraform will display the EC2 instance's public IP after deployment.
+
+tfvars File
+-----------
+- A tfvars file is used to store the values of input variables.
+- It helps separate configuration values from the main Terraform code.
+- Different tfvars files can be used for different environments such as Dev, Test, and Production.
+
+Example:
+
+terraform.tfvars
+
+instance_type = "t2.micro"
+instance_name = "web-server"
+
+Benefits of tfvars File
+-----------------------
+- Avoids hardcoding values.
+- Makes configurations reusable.
+- Easy environment-specific deployments.
+- Improves code maintainability.
+
+Interview Answer
+----------------
+Variables are used to make Terraform configurations dynamic and reusable.
+
+Input Variables:
+Used to pass values into Terraform scripts.
+
+Output Variables:
+Used to display or export values from created resources.
+
+tfvars File:
+A tfvars file stores the values of input variables separately from the Terraform code, making configuration management easier and more flexible.

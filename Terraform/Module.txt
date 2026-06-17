@@ -1,0 +1,58 @@
+Terraform Module Structure
+
+Root Module:
+
+* provider.tf     → Provider configuration
+* main.tf         → Calls modules
+* variables.tf    → Declares root variables
+* terraform.tfvars → Stores variable values
+* outputs.tf      → Displays module outputs
+
+Child Module (e.g., module/ec2):
+
+* main.tf         → Creates resources
+* variables.tf    → Module input variables
+* outputs.tf      → Module output values
+
+Flow:
+
+terraform.tfvars
+↓
+Root variables.tf
+↓
+Root main.tf
+↓
+Module variables.tf
+↓
+Resources
+↓
+Module outputs.tf
+↓
+Root outputs.tf
+↓
+terraform output
+
+Module Call:
+
+module "ec2_instance" {
+source = "./module/ec2"
+
+ami_value           = var.ami_value
+instance_type_value = var.instance_type_value
+}
+
+Accessing Module Outputs:
+
+module.<module_name>.<output_name>
+
+Examples:
+module.ec2_instance.public_ip
+module.vpc.vpc_id
+module.eks.cluster_name
+
+Key Rule:
+
+* Variables go INTO a module.
+* Outputs come OUT of a module.
+* Child modules cannot directly read terraform.tfvars.
+* Root module passes values to child modules.

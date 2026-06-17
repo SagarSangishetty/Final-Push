@@ -1,0 +1,101 @@
+******************Terraform State File (terraform.tfstate)***********************
+
+Terraform State File (terraform.tfstate) is the heart of Terraform. It stores metadata and information about the infrastructure managed by Terraform. It is created after the first terraform apply and is used by Terraform to track resources and determine infrastructure changes.
+
+Advantages:
+
+Multi-cloud support
+Reusable modules
+Execution plan before deployment
+Automation and version control
+
+Drawbacks:
+
+State file management challenges
+No automatic rollback
+State file may contain sensitive data
+
+
+**********************Remote Backend******************
+
+A Remote Backend is used to store the Terraform state file in a remote location instead of the local machine. It enables multiple team members to share the same state file, provides state locking to prevent concurrent modifications, and offers versioning and backup capabilities for the state file
+
+
+Common Remote Backends:
+
+AWS S3
+Terraform Cloud
+Azure Storage Account
+Google Cloud Storage (GCS)
+
+Advantages:
+
+Centralized state file management
+Team collaboration using the same state file
+State locking prevents simultaneous modifications
+Backup and versioning of state files
+Reduced risk of state file loss from a local machine
+
+To store the Terraform state file in a remote backend, you must define a backend configuration in your Terraform code.
+
+terraform {
+  backend "s3" {
+    bucket = "my-terraform-state-bucket"
+    key    = "prod/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+****************************Terraform State Locking**********************
+
+State Locking is a mechanism used by Terraform to prevent multiple users from modifying the same state file at the same time.
+
+Architecture:
+Terraform
+    |
+    v
+S3 Bucket  ---> Stores terraform.tfstate
+    |
+    v
+DynamoDB Table ---> Stores lock information
+
+
+
+Configuring State locking 
+
+AWS S3 Backend
+Older and still common setups use DynamoDB for state locking:
+Example :
+
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+  }
+}
+
+In this setup:
+
+S3 stores the state file.
+DynamoDB stores lock information.
+When terraform apply starts, Terraform creates a lock entry in DynamoDB.
+When the operation completes, the lock is removed.
+
+Dynamo DB Creation : 
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = "terraform-locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+
+  tags = {
+    Name = "Terraform State Lock Table"
+  }
+}

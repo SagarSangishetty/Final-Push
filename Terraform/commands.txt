@@ -1,0 +1,12 @@
+terraform apply -var-file <tfvarfilename>
+
+
+terraform show   ---   Show the name of the current workspace
+
+terraform workspace new  <wrokapace name> ---  Create a new workspace
+
+terraform workspace list   ---   List Workspaces
+
+terraform workspace delete  ---  Delete a workspace
+
+terraform workspace select  ---  Select a workspace
