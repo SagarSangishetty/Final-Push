@@ -1,0 +1,85 @@
+Count -- is a Terraform meta-argument used to create the same resource multiple times.
+
+Code :
+resource "aws_subnet" "public" {
+  count = 2
+
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "${var.environment}-public-subnet-${count.index + 1}"
+  }
+}
+
+What Terraform does
+
+count = 2
+
+➡️ Run this block 2 times.
+
+First Run (count.index = 0)
+CIDR = var.public_subnet_cidrs[0]...
+..
+
+Second Run (count.index = 1)
+
+CIDR = var.public_subnet_cidrs[1]...
+..
+
+Defining Variable : 
+
+variable "public_subnet_cidrs" {
+  type = list(string)
+}
+
+
+Defining tfvars : 
+
+public_subnet_cidrs = [
+  "10.0.1.0/24",
+  "10.0.2.0/24"
+]
+
+Note : Terraform uses the position in the list.
+
+Indexes become:
+[0] = 10.0.1.0/24
+[1] = 10.0.2.0/24
+
+Picks both values in resource.
+
+cidr_block = var.public_subnet_cidrs[count.index]
+
+First loop:
+count.index = 0
+
+Second loop:
+count.index = 1
+
+*******************Imp : The important thing is that all the lists should have matching order:*******************
+
+Calling the count value in code :
+
+General Syntax
+resource_type.resource_name[index].attribute
+
+Referencing first index in main.tf/for fetching id :
+aws_subnet.public[0].id
+
+Get All Subnet IDs
+aws_subnet.public[*].id
+
+Calling the count in output variable : 
+
+Output First Subnet
+output "public_subnet_1_id" {
+  value = aws_subnet.public[0].id
+}
+
+Output All Subnet IDs (Recommended)
+output "public_subnet_ids" {
+  value = aws_subnet.public[*].id
+}

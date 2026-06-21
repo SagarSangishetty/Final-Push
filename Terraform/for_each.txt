@@ -1,0 +1,132 @@
+For_Each -- is a Terraform meta-argument used to create multiple resources using unique keys.
+
+Code :
+
+resource "aws_subnet" "public" {
+  for_each = {
+    subnet1 = {
+      cidr = "10.0.1.0/24"
+      az   = "ap-south-1a"
+    }
+
+    subnet2 = {
+      cidr = "10.0.2.0/24"
+      az   = "ap-south-1b"
+    }
+  }
+
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = each.value.cidr
+  availability_zone = each.value.az
+
+  tags = {
+    Name = "${var.environment}-${each.key}"
+  }
+}
+
+What Terraform does
+
+for_each creates one resource for each key.
+
+➡️ Run this block for every key-value pair.
+
+First Run
+
+each.key   = subnet1
+each.value = {
+  cidr = "10.0.1.0/24"
+  az   = "ap-south-1a"
+}
+
+Creates:
+
+dev-subnet1
+10.0.1.0/24
+ap-south-1a
+
+Second Run
+
+each.key   = subnet2
+each.value = {
+  cidr = "10.0.2.0/24"
+  az   = "ap-south-1b"
+}
+
+Creates:
+
+dev-subnet2
+10.0.2.0/24
+ap-south-1b
+
+Defining Variable :
+
+variable "public_subnets" {
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
+}
+
+Defining tfvars :
+
+public_subnets = {
+  subnet1 = {
+    cidr = "10.0.1.0/24"
+    az   = "ap-south-1a"
+  }
+
+  subnet2 = {
+    cidr = "10.0.2.0/24"
+    az   = "ap-south-1b"
+  }
+}
+
+Note : Terraform uses the key names.
+
+Keys become:
+
+subnet1
+subnet2
+
+Calling values in resource
+
+cidr_block        = each.value.cidr
+availability_zone = each.value.az
+
+First loop:
+
+each.key = subnet1
+
+Second loop:
+
+each.key = subnet2
+
+*******************Imp : Each resource is identified by a unique key, not by index.*******************
+
+Calling the for_each value in code :
+
+General Syntax
+
+resource_type.resource_name["key"].attribute
+
+Referencing specific resource in main.tf/for fetching id :
+
+aws_subnet.public["subnet1"].id
+
+Get All Subnet IDs
+
+values(aws_subnet.public)[*].id
+
+Calling the for_each in output variable :
+
+Output Specific Subnet
+
+output "subnet1_id" {
+  value = aws_subnet.public["subnet1"].id
+}
+
+Output All Subnet IDs (Recommended)
+
+output "public_subnet_ids" {
+  value = values(aws_subnet.public)[*].id
+}

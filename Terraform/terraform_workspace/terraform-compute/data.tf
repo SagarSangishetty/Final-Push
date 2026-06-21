@@ -1,7 +1,7 @@
 data "aws_subnet" "public" {
   filter {
     name   = "tag:Name"
-    values = ["${var.environment}-public-subnet"]
+    values = ["${var.environment}-public-subnet-1"]
   }
 }
 

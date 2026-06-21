@@ -3,14 +3,16 @@ variable "vpc_cidr" {
   
 }
 
-variable "public_subnet_cidr" {
-    description = "Cidr for Public Subnet"
-  
+variable "public_subnet_cidrs" {
+  type = list(string)
 }
 
-variable "availability_zone" {
-    description = "Avaliability zone details"
-  
+variable "private_subnet_cidrs" {
+  type = list(string)
+}
+
+variable "availability_zones" {
+  type = list(string)
 }
 
 variable "environment" {
