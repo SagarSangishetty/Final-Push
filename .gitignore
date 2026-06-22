@@ -8,3 +8,29 @@ secret.yml
 backend_resource/
 terraform-compute/
 terraform-network/
+
+# Terraform state — never commit state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform working directories
+.terraform/
+.terraform.lock.hcl
+
+# Sensitive variable files
+*.tfvars.json
+secrets.tfvars
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files (local developer overrides)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Generated plan files
+*.tfplan
