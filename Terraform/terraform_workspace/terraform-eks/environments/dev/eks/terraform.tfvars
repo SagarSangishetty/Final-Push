@@ -1,0 +1,9 @@
+project            = "sagar-eks"
+environment        = "dev"
+cluster_name       = "sagar-eks-dev"
+cluster_version    = "1.30"
+node_instance_type = "m7i-flex.large"
+node_desired_size  = 2
+node_min_size      = 1
+node_max_size      = 3
+allowed_cidr_blocks = ["49.36.106.226/32"]  # replace with your actual IP/32 for security
