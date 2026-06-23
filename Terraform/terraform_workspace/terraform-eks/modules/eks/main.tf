@@ -215,6 +215,40 @@ resource "aws_iam_openid_connect_provider" "cluster" {
   })
 }
 
+# ─── EBS CSI Driver IAM Role (IRSA) ───────────────────────────────────────────
+# This role allows the EBS CSI driver pods to manage EBS volumes
+resource "aws_iam_role" "ebs_csi_driver" {
+  name = "${local.name_prefix}-ebs-csi-driver-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.cluster.arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+          "${replace(aws_iam_openid_connect_provider.cluster.url, "https://", "")}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-ebs-csi-driver-role"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy" {
+  role       = aws_iam_role.ebs_csi_driver.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+
+
 # ─── 6. Managed Node Group ────────────────────────────────────────────────────
 resource "aws_eks_node_group" "general" {
   cluster_name    = aws_eks_cluster.this.name
@@ -279,10 +313,17 @@ resource "aws_eks_addon" "kube_proxy" {
 }
 
 resource "aws_eks_addon" "ebs_csi" {
-  cluster_name  = aws_eks_cluster.this.name
-  addon_name    = "aws-ebs-csi-driver"
+  cluster_name             = aws_eks_cluster.this.name
+  addon_name               = "aws-ebs-csi-driver"
+  addon_version            = "v1.35.0-eksbuild.1"  # Use latest compatible version
+  service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
   resolve_conflicts_on_create = "OVERWRITE"
-  resolve_conflicts_on_update = "OVERWRITE"   
-  depends_on    = [aws_eks_node_group.general]
-  tags          = local.common_tags
+  resolve_conflicts_on_update = "OVERWRITE"
+  
+  depends_on = [
+    aws_eks_node_group.general,
+    aws_iam_role_policy_attachment.ebs_csi_driver_policy
+  ]
+  
+  tags = local.common_tags
 }
