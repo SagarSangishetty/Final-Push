@@ -20,6 +20,15 @@ data "terraform_remote_state" "iam" {
   }
 }
 
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config = {
+    bucket = "shettysagar-tf-statefile-bucket"
+    key    = "eks_dev_vpc/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 # ─── AWS provider ─────────────────────────────────────────────────────────────
 provider "aws" {
   region = var.aws_region
@@ -105,6 +114,19 @@ resource "helm_release" "lb_controller" {
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = data.terraform_remote_state.iam.outputs.lb_controller_role_arn
+  }
+
+  # Fix — explicitly pass VPC ID, skip metadata discovery
+
+  set {
+    name  = "vpcId"
+    value = data.terraform_remote_state.vpc.outputs.vpc_id
+  }
+
+  # Fix — explicitly pass region
+  set {
+    name  = "region"
+    value = var.aws_region
   }
 
   set {

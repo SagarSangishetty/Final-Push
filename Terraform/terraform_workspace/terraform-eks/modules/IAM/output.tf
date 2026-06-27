@@ -12,8 +12,3 @@ output "external_secrets_role_arn" {
   description = "External Secrets Operator role ARN"
   value       = aws_iam_role.external_secrets.arn
 }
-
-output "ebs_csi_role_arn" {
-  description = "EBS CSI Driver role ARN"
-  value       = aws_iam_role.ebs_csi.arn
-}

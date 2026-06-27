@@ -9,3 +9,8 @@ output "cluster_endpoint" {
 output "oidc_provider_arn" {
   value = module.eks.oidc_provider_arn
 }
+
+output "cluster_ca_certificate" {
+  value = module.eks.cluster_ca_certificate
+  
+}
