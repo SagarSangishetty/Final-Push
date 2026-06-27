@@ -1,0 +1,27 @@
+Apply order — strict sequence required:
+
+vpc layer apply
+      ↓
+eks layer apply → outputs written to state
+      ↓
+iam layer apply → outputs written to state
+      ↓
+helm layer apply → reads eks + iam outputs via remote state
+
+
+Verify after apply:
+
+# Update kubeconfig
+aws eks update-kubeconfig --name sagar-eks-dev --region ap-south-1
+
+# LB Controller — should show 2 pods
+kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+
+# Cluster Autoscaler
+kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-cluster-autoscaler
+
+# ESO
+kubectl get pods -n external-secrets
+
+# Confirm IRSA annotation on LB controller SA
+kubectl describe sa aws-load-balancer-controller -n kube-system | grep role-arn

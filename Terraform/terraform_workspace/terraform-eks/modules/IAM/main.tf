@@ -89,29 +89,6 @@ data "aws_iam_policy_document" "external_secrets_trust" {
   }
 }
 
-data "aws_iam_policy_document" "ebs_csi_trust" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-
-    principals {
-      type        = "Federated"
-      identifiers = [var.oidc_provider_arn]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${var.oidc_provider_url}:sub"
-      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${var.oidc_provider_url}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-  }
-}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROLE 1 — AWS Load Balancer Controller
@@ -431,19 +408,4 @@ resource "aws_iam_policy" "external_secrets" {
 resource "aws_iam_role_policy_attachment" "external_secrets" {
   role       = aws_iam_role.external_secrets.name
   policy_arn = aws_iam_policy.external_secrets.arn
-}
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# ROLE 4 — EBS CSI Driver
-# Creates, attaches, detaches EBS volumes for PersistentVolumeClaims
-# ═══════════════════════════════════════════════════════════════════════════════
-resource "aws_iam_role" "ebs_csi" {
-  name               = "${local.name_prefix}-ebs-csi-role"
-  assume_role_policy = data.aws_iam_policy_document.ebs_csi_trust.json
-}
-
-# AWS provides a managed policy for EBS CSI — no need to write it manually
-resource "aws_iam_role_policy_attachment" "ebs_csi" {
-  role       = aws_iam_role.ebs_csi.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }

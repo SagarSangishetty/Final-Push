@@ -1,0 +1,44 @@
+IAM / IRSA
+What is IRSA:
+
+Without IRSA → pod uses node IAM role → every pod on node gets same permissions → not secure
+
+With IRSA → each pod gets its own IAM role via ServiceAccount → least privilege at pod level
+
+How trust policy works:
+
+Three things AWS STS validates:
+
+Federated → only this cluster's OIDC provider can issue tokens
+:sub → only specific namespace:serviceaccount can assume role
+:aud → token must be intended for STS
+
+Flow:
+Pod presents OIDC token
+        ↓
+AWS STS validates against cluster OIDC provider
+        ↓
+Matches namespace:serviceaccount in trust policy
+        ↓
+STS returns temporary credentials for that role only
+
+4 IRSA Roles created:
+LB Controller
+
+Namespace:SA → kube-system:aws-load-balancer-controller
+Permission → Create/manage ALBs and target groups
+
+Cluster Autoscaler
+
+Namespace:SA → kube-system:cluster-autoscaler
+Permission → Describe/modify autoscaling groups
+
+External Secrets Operator
+
+Namespace:SA → external-secrets:external-secrets
+Permission → Read from Secrets Manager and SSM
+
+EBS CSI Driver
+
+Namespace:SA → kube-system:ebs-csi-controller-sa
+Permission → AmazonEBSCSIDriverPolicy (AWS managed)

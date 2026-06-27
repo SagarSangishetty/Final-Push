@@ -1,0 +1,83 @@
+Phase 2 - EKS
+
+IAM — Two separate roles, commonly confused:
+Cluster Role → assumed by eks.amazonaws.com → manages ENIs, SGs, NLBs for API server → needs AmazonEKSClusterPolicy
+Node Role → assumed by ec2.amazonaws.com → needs 3 policies:
+
+AmazonEKSWorkerNodePolicy → register node with cluster
+AmazonEKS_CNI_Policy → pod networking via VPC CNI
+AmazonEC2ContainerRegistryReadOnly → pull images from ECR
+
+
+Security Groups — two SGs, bidirectional trust:
+Cluster SG (API server):
+
+Inbound: 443 from allowed CIDRs (your machine / CI)
+Outbound: all (control plane reaches nodes + AWS APIs)
+
+Node SG (worker nodes):
+
+Inbound: all ports from self (self = true, protocol = -1) → pod-to-pod + node-to-node
+Inbound: 1025-65535 from Cluster SG → kubelet communication from control plane
+Inbound: 443 from Cluster SG → metrics + webhooks
+Outbound: all
+
+Bidirectional rule:
+
+Extra ingress rule added to Cluster SG → allows 443 from Node SG
+Completes the loop: nodes can reach API server + API server can reach nodes
+
+
+EKS Cluster:
+
+depends_on cluster role policy attachment — if policy not attached before cluster creation, EKS throws permissions error
+endpoint_private_access = true → nodes talk to API server privately
+endpoint_public_access = true → kubectl from local machine works (disable in prod)
+All 5 control plane log types enabled → api, audit, authenticator, controllerManager, scheduler → CloudWatch
+
+
+OIDC Provider:
+
+Created using cluster's issuer URL after cluster is up
+Enables IRSA — pods exchange OIDC token with AWS STS for temporary credentials
+Without OIDC → only option is node-level IAM role → every pod on node gets same permissions → not least privilege
+
+
+EBS CSI Driver IRSA:
+
+Separate IAM role trusted by ebs-csi-controller-sa service account in kube-system
+Uses managed policy AmazonEBSCSIDriverPolicy
+Role ARN passed directly to addon via service_account_role_arn
+Lesson learned: addon created without this → CrashLoopBackOff immediately
+
+
+Managed Node Group:
+
+Placed in private subnets → no public IPs on worker nodes
+depends_on all 3 node role policy attachments — nodes cannot register with cluster if policies missing at launch time
+update_config { max_unavailable = 1 } → rolling update, cluster stays available during node group updates
+
+
+Add-ons:
+
+coredns → DNS resolution inside cluster — service discovery
+kube-proxy → maintains iptables rules on nodes — service routing
+vpc-cni → assigns VPC IPs to pods — each pod gets real VPC IP
+aws-ebs-csi-driver → EBS volumes for PersistentVolumeClaims
+All depend on node group — add-ons need nodes to be Ready before scheduling
+resolve_conflicts_on_create/update = OVERWRITE → replaces most_recent removed in AWS provider v6.x
+
+
+Key lesson — dependency chain order:
+Cluster role + policy
+      ↓
+EKS cluster
+      ↓
+OIDC provider
+      ↓
+Node role + 3 policies
+      ↓
+Node group
+      ↓
+Add-ons
+Terraform resolves this automatically via depends_on and resource references — but you must declare them correctly.

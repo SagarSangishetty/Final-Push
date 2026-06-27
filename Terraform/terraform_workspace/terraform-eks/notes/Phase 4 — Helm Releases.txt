@@ -1,0 +1,46 @@
+Why Helm via Terraform and not manual helm install:
+
+Manual helm install → not tracked in state → not reproducible → drift possible
+
+Helm via Terraform → declared as code → single apply → state tracks chart versions and valuesSeparate state file:
+
+Helm is a separate Terraform root with its own backend:
+eks/helm/terraform.tfstate
+Cannot directly reference other module outputs — reads them via terraform_remote_state data source pointing to EKS and IAM state files in S3Key concept — terraform_remote_state:
+Other layer applies → outputs written to S3 state file
+        ↓
+Helm layer reads those outputs via terraform_remote_state
+        ↓
+No hardcoding of cluster endpoint, role ARNs, cluster name
+        ↓
+Values automatically picked up from state on every planLesson learned → outputs must be declared in source layer outputs.tf AND terraform apply must be run before remote state can read themTwo providers needed — both authenticate via aws eks get-token:Kubernetes provider → creates namespace for ESO
+
+Helm provider → installs all 3 helm releasesBoth use:
+
+cluster_endpoint from EKS remote state
+cluster_ca_certificate from EKS remote state
+exec block calling aws eks get-token dynamically
+Why exec and not static token → EKS tokens expire every 15 minutes → exec fetches fresh token on every call → long applies never fail with expired token3 Helm Releases:LB Controller
+
+Chart → aws-load-balancer-controller
+Repo → https://aws.github.io/eks-charts
+Namespace → kube-system
+Key values → clusterName, replicaCount=2
+IRSA → serviceAccount.annotations.eks.amazonaws.com/role-arn = lb_controller_role_arn from IAM remote state
+Purpose → watches Ingress resources, creates ALBs in AWS automatically
+Cluster Autoscaler
+
+Chart → cluster-autoscaler
+Repo → https://kubernetes.github.io/autoscaler
+Namespace → kube-system
+Key values → autoDiscovery.clusterName, awsRegion
+IRSA → rbac.serviceAccount.annotations.eks.amazonaws.com/role-arn = cluster_autoscaler_role_arn from IAM remote state
+Purpose → scales node group up when pods are pending, scales down after 10min underutilisation
+External Secrets Operator
+
+Chart → external-secrets
+Repo → https://charts.external-secrets.io
+Namespace → external-secrets (created via kubernetes_namespace resource first)
+Key values → installCRDs=true
+IRSA → serviceAccount.annotations.eks.amazonaws.com/role-arn = external_secrets_role_arn from IAM remote state
+Purpose → watches ExternalSecret CRDs, fetches value from Secrets Manager, creates K8s Secret automatically

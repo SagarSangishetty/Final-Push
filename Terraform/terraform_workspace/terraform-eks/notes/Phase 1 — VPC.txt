@@ -1,0 +1,30 @@
+Phase 1 — VPC
+What we built:
+
+VPC (10.0.0.0/16) → IGW → 3 public + 3 private subnets across 3 AZs → NAT GW → Route tables → VPC Flow logs
+Subnet tags — why critical:
+
+kubernetes.io/role/elb = 1 → public subnets → internet-facing ALBs
+kubernetes.io/role/internal-elb = 1 → private subnets → internal ALBs
+kubernetes.io/cluster/<name> = shared → subnet discoverable by this EKS cluster
+Without these tags AWS LB Controller cannot find subnets → Ingress creation silently fails
+
+Routing:
+
+Public subnets → one shared route table → IGW
+Private subnets → separate route table(s) → NAT GW
+dev: single NAT GW (cost saving) | prod: one NAT GW per AZ (HA)
+Route table alone does nothing — subnet association binds the rules to the subnet
+
+VPC Flow Logs:
+
+Captures metadata only — source/dest IP, port, protocol, ALLOW/DENY
+Not packet content — just traffic patterns
+Needs IAM role with trust policy for vpc-flow-logs.amazonaws.com + CloudWatch write permissions
+Enterprise requirement — audit, compliance, SG debugging
+
+Two important VPC settings:
+
+enable_dns_hostnames = true — nodes get DNS names
+enable_dns_support = true — nodes resolve AWS internal hostnames (ECR, S3, EKS API)
+Both required for EKS — without them nodes cannot reach AWS services
