@@ -1,0 +1,242 @@
+================================================================
+     GITHUB ACTIONS — BUILD & PUSH TO ECR USING OIDC
+                  (Company Standard)
+================================================================
+
+----------------------------------------------------------------
+WHAT IS OIDC IN GITHUB ACTIONS?
+----------------------------------------------------------------
+
+Without OIDC (bad practice):
+- Store AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in secrets
+- These are long-lived credentials — if leaked, attacker has
+  permanent AWS access until manually rotated
+- Most companies now ban static keys in CI/CD pipelines
+
+With OIDC (company standard):
+- GitHub Actions requests a short-lived token from AWS
+- Token expires after the workflow finishes
+- No static keys stored anywhere
+- Same concept as IRSA in your EKS project —
+  a trusted identity gets a role, not a hardcoded key
+
+You already understand this pattern:
+  EKS Pod → OIDC → IAM Role → AWS resource
+  GitHub Actions → OIDC → IAM Role → AWS resource
+  Same idea, different caller.
+
+----------------------------------------------------------------
+PART 1 — AWS SETUP (One time — done in AWS console or Terraform)
+----------------------------------------------------------------
+
+STEP 1 — Add GitHub as an Identity Provider in AWS IAM
+
+  IAM → Identity Providers → Add Provider
+  Provider Type : OpenID Connect
+  Provider URL  : https://token.actions.githubusercontent.com
+  Audience      : sts.amazonaws.com
+
+  Click "Get thumbprint" then Add Provider.
+
+----
+
+STEP 2 — Create an IAM Role for GitHub Actions
+
+  IAM → Roles → Create Role
+  Trusted Entity : Web Identity
+  Identity Provider : token.actions.githubusercontent.com
+  Audience : sts.amazonaws.com
+
+  Under condition — restrict to YOUR repo only (important):
+
+  Key   : token.actions.githubusercontent.com:sub
+  Value : repo:YOUR_GITHUB_USERNAME/YOUR_REPO_NAME:ref:refs/heads/master
+
+  This means ONLY your specific repo on master branch
+  can assume this role. No other repo can use it.
+
+----
+
+STEP 3 — Attach Permissions to the Role
+
+  Attach this AWS managed policy:
+  - AmazonEC2ContainerRegistryPowerUser
+    (allows push/pull to ECR)
+
+  Save the Role ARN — you will need it in the workflow.
+  Format: arn:aws:iam::123456789:role/github-actions-ecr-role
+
+----
+
+STEP 4 — Create ECR Repository
+
+  ECR → Create Repository
+  Name : my-first-github-app
+  Type : Private
+
+  Note your ECR registry URL:
+  Format: 123456789.dkr.ecr.ap-south-1.amazonaws.com
+
+----------------------------------------------------------------
+PART 2 — GITHUB SETUP
+----------------------------------------------------------------
+
+Secrets to add in GitHub:
+  Repository → Settings → Secrets → Actions
+
+  AWS_ROLE_ARN
+  Value: arn:aws:iam::123456789:role/github-actions-ecr-role
+
+  AWS_REGION
+  Value: ap-south-1
+
+  ECR_REGISTRY
+  Value: 123456789.dkr.ecr.ap-south-1.amazonaws.com
+
+  ECR_REPOSITORY
+  Value: my-first-github-app
+
+NOTE: No AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY stored.
+That is the whole point of OIDC.
+
+----------------------------------------------------------------
+PART 3 — THE WORKFLOW
+----------------------------------------------------------------
+
+name: Build and Push to ECR (OIDC)
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  environment: dev
+
+# CRITICAL — OIDC requires these permissions
+# Without this block OIDC will fail
+permissions:
+  id-token: write   # allows GitHub to request OIDC token
+  contents: read    # allows checkout
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Step 1 — Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2 — Configure AWS credentials using OIDC
+      # No keys — GitHub exchanges OIDC token for AWS role
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 3 — Login to ECR
+      # Uses the assumed role credentials automatically
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Step 4 — Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 5 — Build and Push to ECR
+      - name: Build and Push to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./python-app
+          file: ./python-app/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:master-${{ github.sha }}
+
+----------------------------------------------------------------
+PART 4 — WHAT HAPPENS AT RUNTIME (important for interviews)
+----------------------------------------------------------------
+
+1. Developer pushes code to master
+
+2. GitHub Actions workflow starts
+
+3. configure-aws-credentials action:
+   - GitHub generates a short-lived OIDC token for this run
+   - Sends token to AWS STS
+   - AWS verifies: is this token from the trusted GitHub
+     OIDC provider AND from the correct repo/branch?
+   - If yes → AWS returns temporary credentials for the role
+   - Credentials are valid only for duration of workflow run
+
+4. amazon-ecr-login action:
+   - Uses those temporary credentials
+   - Authenticates Docker to your ECR registry
+
+5. docker/build-push-action:
+   - Builds your image
+   - Pushes with both :latest and :master-SHA tags to ECR
+
+6. Workflow ends → temporary credentials expire automatically
+
+----------------------------------------------------------------
+PART 5 — STATIC KEYS vs OIDC (interview comparison)
+----------------------------------------------------------------
+
+Static Keys:
+- Stored permanently in GitHub Secrets
+- Long-lived — valid until manually rotated
+- If secrets are leaked → attacker has permanent AWS access
+- Rotation is manual and easy to forget
+- Some companies still use this for simplicity
+
+OIDC:
+- No keys stored anywhere
+- Short-lived — expires when workflow ends
+- If intercepted → useless after workflow completes
+- Rotation is automatic — nothing to manage
+- Industry standard for cloud CI/CD in 2025/2026
+
+Interview answer if asked "how do you secure AWS credentials
+in GitHub Actions?":
+
+"We use OIDC instead of static keys. GitHub Actions assumes
+an IAM role via a trust relationship scoped to our specific
+repository and branch. Credentials are short-lived and expire
+after the workflow completes — nothing is stored in secrets
+except the Role ARN."
+
+----------------------------------------------------------------
+PART 6 — COMPARISON: DOCKER HUB vs ECR
+----------------------------------------------------------------
+
+Docker Hub:
+- Public registry
+- Free tier has rate limits (pull limits)
+- Credentials stored as secrets (username + token)
+- Fine for learning and open source projects
+
+ECR:
+- Private registry inside your AWS account
+- No rate limits
+- IAM-controlled access — no separate credentials needed
+- Images stay inside your AWS network — faster pulls from EKS
+- Company standard when stack is AWS
+
+================================================================
+YOUR BUILD SEQUENCE SO FAR
+================================================================
+
+✅ Basic workflows & triggers
+✅ workflow_dispatch with inputs
+✅ Secrets & environment variables
+✅ Docker build & push to Docker Hub
+⬜ Docker build & push to ECR via OIDC   ← BUILD THIS NOW
+⬜ Deploy to EKS                          ← NEXT AFTER ECR
+
+================================================================

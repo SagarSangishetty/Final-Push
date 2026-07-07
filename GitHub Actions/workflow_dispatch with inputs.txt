@@ -1,0 +1,155 @@
+```text
+=========================================
+GitHub Actions - workflow_dispatch
+(Manual Trigger)
+=========================================
+
+What is workflow_dispatch?
+
+workflow_dispatch is a GitHub Actions event that allows you to
+run a workflow manually from the GitHub Actions page.
+
+Unlike push or pull_request, the workflow does NOT start
+automatically. A user must click the "Run workflow" button.
+
+-------------------------------------------------
+Syntax
+-------------------------------------------------
+
+on:
+  workflow_dispatch:
+
+-------------------------------------------------
+Inputs
+-------------------------------------------------
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy to which environment?'
+        required: true
+        default: 'dev'
+
+-------------------------------------------------
+Example
+-------------------------------------------------
+
+name: Manual Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print Message
+        run: echo "Workflow started manually."
+
+-------------------------------------------------
+How to Run
+-------------------------------------------------
+
+1. Push the workflow file to GitHub.
+2. Open your GitHub repository.
+3. Click the "Actions" tab.
+4. Select the workflow.
+5. Click "Run workflow".
+6. Select the branch (if prompted).
+7. Click the green "Run workflow" button.
+
+GitHub then starts the workflow.
+
+-------------------------------------------------
+When to Use workflow_dispatch
+-------------------------------------------------
+
+- Deploy an application manually.
+- Restart a failed process.
+- Run a backup script.
+- Execute maintenance tasks.
+- Test a workflow without making a code change.
+
+-------------------------------------------------
+Automatic vs Manual Trigger
+-------------------------------------------------
+
+push
+→ Runs automatically after code is pushed.
+
+pull_request
+→ Runs automatically when a PR is created or updated.
+
+workflow_dispatch
+→ Runs only when a user manually clicks
+   "Run workflow".
+
+-------------------------------------------------
+Advantages
+-------------------------------------------------
+
+✔ No need to push dummy commits.
+✔ Full control over when the workflow runs.
+✔ Useful for deployments and maintenance.
+✔ Easy to test workflows.
+
+-------------------------------------------------
+Real-Life Example
+-------------------------------------------------
+
+Suppose your application is already deployed.
+
+You need to restart the deployment.
+
+Instead of making a fake code change just to
+trigger a workflow, you simply go to:
+
+GitHub
+→ Actions
+→ Restart Workflow
+→ Run Workflow
+
+The workflow starts immediately.
+
+-------------------------------------------------
+Interview Questions
+-------------------------------------------------
+
+Q1. What is workflow_dispatch?
+
+A:
+workflow_dispatch is a manual trigger that allows a user
+to start a GitHub Actions workflow from the GitHub
+Actions page.
+
+-------------------------------------------------
+
+Q2. Does workflow_dispatch run automatically?
+
+A:
+No. It only runs when a user manually clicks
+the "Run workflow" button.
+
+-------------------------------------------------
+
+Q3. When would you use workflow_dispatch?
+
+A:
+- Manual deployments
+- Backup jobs
+- Maintenance tasks
+- Testing workflows
+- Restarting jobs without pushing code
+
+-------------------------------------------------
+
+Key Point
+
+push            → Automatic
+pull_request    → Automatic
+workflow_dispatch → Manual
+```

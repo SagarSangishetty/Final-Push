@@ -1,0 +1,84 @@
+ Core Concepts
+
+Workflow, Job, Step, Action, Runner — the vocabulary
+.github/workflows/*.yml file location and structure
+on: triggers — push, pull_request, workflow_dispatch, schedule (cron)
+(Maps directly to Jenkins pipeline triggers — same idea, different syntax)
+
+2. Workflow Syntax
+
+jobs:, steps:, runs-on: (ubuntu-latest, etc.)
+uses: vs run: — calling a pre-built action vs running a shell command
+Environment variables — env: at workflow, job, and step level
+with: for passing inputs to actions
+
+3. Secrets & Variables
+
+Repository Secrets vs Environment Secrets vs Organization Secrets
+${{ secrets.AWS_ACCESS_KEY_ID }} syntax
+GitHub Variables (vars:) for non-sensitive config
+(This replaces what you did manually with External Secrets Operator/Jenkins credentials — same concept, different platform)
+
+4. Build & Push Docker Image
+
+Checkout action (actions/checkout@v4)
+Docker build-push-action
+Login to Docker Hub / ECR using secrets
+(You've done this exact flow in Jenkins — just translate it)
+
+5. Matrix Builds
+
+strategy: matrix: — running the same job across multiple versions/OS in parallel
+Why this is something Jenkins makes harder
+
+6. Artifacts & Caching
+
+actions/upload-artifact, actions/download-artifact
+actions/cache — caching dependencies (node_modules, pip packages) to speed up runs
+
+7. Deploy to Kubernetes (EKS)
+
+aws-actions/configure-aws-credentials@v4
+aws-actions/amazon-ecr-login
+kubectl apply step using OIDC-based AWS auth (no static keys — ties into your IRSA knowledge)
+(This is your strongest connector — you already understand OIDC/IRSA from your EKS project)
+
+8. Terraform in GitHub Actions (High value — ties your two new skills together)
+
+hashicorp/setup-terraform@v3
+Running terraform plan on PR, posting plan as PR comment
+terraform apply on merge to main, gated by environment approval
+(This is literally the governance answer you just learned — build it for real)
+
+9. Reusable Workflows & Composite Actions
+
+workflow_call — calling one workflow from another (like Terraform modules, but for pipelines)
+Composite actions for repeated step sequences
+
+10. Environments & Approvals
+
+GitHub Environments (dev/prod) with required reviewers
+Branch protection rules tied to workflow checks
+
+11. Self-Hosted Runners (brief — good to know exists)
+
+Difference from GitHub-hosted runners
+Why companies use them (cost, network access to private VPC)
+
+
+Suggested order of attack: 1 → 2 → 3 → 4 (get a working pipeline fast), then 7 and 8 (your highest-value, most interview-relevant pieces since they connect directly to your EKS project and Terraform governance answer), then the rest.
+
+
+
+
++------------------------------+----------------------------+-------------------------------------------+
+| Topic                        | Priority                   | Notes                                     |
++------------------------------+----------------------------+-------------------------------------------+
+| Push + pull_request triggers | ✅ Done                    | Basic workflow triggers                   |
+| workflow_dispatch            | ✅ Learn                   | Run workflow manually                     |
+| workflow_dispatch (inputs)   | ✅ Learn this next         | Manual trigger with user inputs           |
+| schedule / cron              | ✅ Learn briefly           | Run workflow on a schedule                |
+| workflow_call                | ✅ Learn concept           | Reusable workflows                        |
+| repository_dispatch          | ⏭️ Skip for now           | Trigger workflow from external systems    |
+| External API triggers        | ⏭️ Skip for now           | API/Webhook-based workflow triggers       |
++------------------------------+----------------------------+-------------------------------------------+

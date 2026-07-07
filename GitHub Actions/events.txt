@@ -1,0 +1,77 @@
+# Single Event Trigger
+
+A workflow is triggered by only one event.
+
+Example:
+
+on:
+  push:
+    branches:
+      - main
+
+Explanation:
+- Workflow runs only when code is pushed to the main branch.
+
+----------------------------------------------------
+
+# Multiple Event Trigger
+
+A workflow can listen to multiple events.
+
+Example:
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+Explanation:
+- Workflow runs when:
+  - Code is pushed to main.
+  - A pull request is opened/updated for main.
+  - Someone manually clicks "Run workflow".
+
+----------------------------------------------------
+
+# Important Note
+
+GitHub Actions uses OR logic for multiple events.
+
+If any one event occurs → Workflow runs.
+
+Examples:
+
+Scenario 1
+----------
+Push to main
+✅ Workflow runs once.
+
+Scenario 2
+----------
+Open a Pull Request
+✅ Workflow runs once.
+
+Scenario 3
+----------
+Click "Run workflow"
+✅ Workflow runs once.
+
+Scenario 4
+----------
+Push code to main, then immediately create a Pull Request.
+✅ Push event triggers one workflow.
+✅ Pull Request event triggers another workflow.
+
+Result: Two separate workflow runs are created because two different events occurred.
+
+
+-------------------------------------------------
+
+Manual Events
+

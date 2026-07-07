@@ -1,0 +1,254 @@
+================================================================
+     GITHUB ACTIONS — DEPLOY TO EKS (Company Standard)
+================================================================
+
+----------------------------------------------------------------
+PART 1 — HOW EKS DEPLOYMENT WORKS IN A PIPELINE
+----------------------------------------------------------------
+
+What happens:
+1. Pipeline has already built and pushed image to ECR
+2. Deploy job runs after build job succeeds
+3. Pipeline authenticates to AWS via OIDC (already working)
+4. Pipeline updates kubeconfig to talk to EKS cluster
+5. kubectl apply updates the deployment with new image tag
+
+Key concept — image update strategy:
+Companies use ONE of these two approaches:
+
+Option A — kubectl set image (quick, no manifest change)
+  kubectl set image deployment/my-app \
+    my-app=ECR_URI:new-tag
+
+Option B — Update manifest then kubectl apply (company standard)
+  - Replace image tag in deployment YAML using sed
+  - kubectl apply the updated manifest
+  - Change is tracked in Git
+
+We will use Option B — same approach you used in Jenkins.
+
+----------------------------------------------------------------
+PART 2 — AWS SETUP (Add EKS permissions to existing role)
+----------------------------------------------------------------
+
+Your existing OIDC role already works for ECR.
+You just need to add EKS permissions to the same role.
+
+Go to:
+IAM → Roles → your github-actions role → Add permissions
+
+Attach this managed policy:
+  AmazonEKSClusterPolicy
+
+Also add this inline policy (allows kubectl commands):
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "eks:DescribeCluster",
+        "eks:ListClusters"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+IMPORTANT — aws-auth ConfigMap:
+EKS uses a ConfigMap called aws-auth to control which
+IAM roles can access the cluster.
+
+You need to add your GitHub Actions role to it:
+
+kubectl edit configmap aws-auth -n kube-system
+
+Add under mapRoles:
+
+  - rolearn: arn:aws:iam::YOUR_ACCOUNT:role/github-actions-role
+    username: github-actions
+    groups:
+      - system:masters
+
+system:masters gives full cluster access.
+In production scope this down to specific namespace only.
+For learning — system:masters is fine.
+
+----------------------------------------------------------------
+PART 3 — GITHUB SECRETS TO ADD
+----------------------------------------------------------------
+
+Add these to your existing GitHub secrets:
+
+  EKS_CLUSTER_NAME
+  Value: your EKS cluster name
+
+  (AWS_REGION and AWS_ROLE_ARN already exist from ECR step)
+
+----------------------------------------------------------------
+PART 4 — DEPLOYMENT MANIFEST
+----------------------------------------------------------------
+
+Make sure your repo has a Kubernetes deployment YAML.
+Example — deployment.yaml:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app
+          image: PLACEHOLDER_IMAGE
+          ports:
+            - containerPort: 8000
+
+NOTE: We use PLACEHOLDER_IMAGE as the image value.
+The pipeline will replace it with the real ECR URI + tag
+using sed before applying. This way the manifest in Git
+never has a hardcoded tag.
+
+----------------------------------------------------------------
+PART 5 — FULL PIPELINE (CI + CD combined)
+----------------------------------------------------------------
+
+name: CI-CD Pipeline — Build Push Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  IMAGE_TAG: master-${{ github.sha }}
+
+jobs:
+
+  # ── JOB 1 — BUILD AND PUSH TO ECR ──────────────────────────
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./python-app
+          file: ./python-app/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+  # ── JOB 2 — DEPLOY TO EKS ───────────────────────────────────
+  deploy-to-eks:
+    runs-on: ubuntu-latest
+    needs: build-and-push        # only runs if build job succeeds
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ secrets.AWS_REGION }} \
+            --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Replace image tag in manifest
+        run: |
+          sed -i "s|PLACEHOLDER_IMAGE|${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}|g" \
+            k8s/deployment.yaml
+
+      - name: Deploy to EKS
+        run: kubectl apply -f k8s/deployment.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/my-app \
+            --timeout=120s
+
+----------------------------------------------------------------
+PART 6 — KEY CONCEPTS TO UNDERSTAND
+----------------------------------------------------------------
+
+needs: build-and-push
+  - Job dependency — deploy only runs if build succeeds
+  - If build fails, deploy never triggers
+  - This is how you prevent deploying a broken image
+
+kubectl rollout status
+  - Watches the deployment until all pods are running
+  - If pods crash or timeout → pipeline fails
+  - Gives you real confirmation that deploy succeeded
+  - Not just "manifest applied" but "pods actually running"
+
+env.IMAGE_TAG at workflow level
+  - Defined once at top: master-${{ github.sha }}
+  - Used in both jobs — build tags the image with it,
+    deploy pulls the same tag
+  - Ensures build and deploy always use identical tag
+
+sed replacement pattern
+  - PLACEHOLDER_IMAGE in manifest → replaced at runtime
+  - Actual ECR URI + SHA tag injected by pipeline
+  - Manifest in Git stays clean, no hardcoded tags
+
+----------------------------------------------------------------
+PART 7 — WHAT TO VERIFY AFTER PIPELINE RUNS
+----------------------------------------------------------------
+
+In GitHub Actions:
+  ✅ Build job — green
+  ✅ Deploy job — green
+  ✅ rollout status shows "successfully rolled out"
+
+In AWS:
+  ✅ ECR — new image with SHA tag present
+
+In terminal:
+  kubectl get pods
+  → pods should show Running status
+
+  kubectl describe deployment my-app
+  → image should show your ECR URI with new SHA tag
+
+================================================================

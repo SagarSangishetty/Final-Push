@@ -1,0 +1,316 @@
+# GitHub Actions - Workflow Notes
+
+## What is a Workflow?
+
+A **Workflow** is an automated process that runs one or more jobs based on a trigger.
+
+**Workflow Location**
+
+```
+.github/workflows/
+```
+
+Example:
+
+```
+.github/workflows/test.yml
+```
+
+---
+
+# Workflow Triggers
+
+Triggers are events that start a workflow.
+
+Common triggers:
+
+* **push** – When code is pushed to a repository.
+* **pull_request** – When a pull request is created or updated.
+* **schedule** – Runs at a scheduled time (Cron).
+* **workflow_dispatch** – Manually trigger the workflow.
+* **repository_dispatch** – Triggered by an external application using GitHub API.
+
+Example:
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+
+---
+
+# Workflow Name
+
+The `name` property gives a friendly name to the workflow.
+
+Syntax:
+
+```yaml
+name: Example Workflow
+```
+
+---
+
+# Workflow Components
+
+## 1. Workflow
+
+The complete automation process defined in a YAML file.
+
+Example:
+
+```
+CI Pipeline
+```
+
+---
+
+## 2. Actions
+
+Reusable units that perform a specific task.
+
+Examples:
+
+* Checkout code
+* Setup Java
+* Setup Node.js
+* Login to AWS
+
+Example:
+
+```yaml
+uses: actions/checkout@v4
+```
+Commonly Used uses: Actions
+
+| Action                        | Purpose                                             |
+| ----------------------------- | --------------------------------------------------- |
+| `actions/checkout@v4`         | Downloads your repository code onto the runner      |
+| `actions/setup-python@v5`     | Installs and configures Python                      |
+| `actions/setup-node@v4`       | Installs and configures Node.js                     |
+| `actions/setup-java@v4`       | Installs and configures Java                        |
+| `docker/login-action@v3`      | Logs in to Docker Hub or another container registry |
+| `docker/build-push-action@v6` | Builds and optionally pushes Docker images          |
+
+
+---
+
+## 3. Jobs
+
+A workflow consists of one or more jobs.
+
+* Runs on a runner.
+* Jobs can run in parallel or sequentially.
+
+Example:
+
+```yaml
+jobs:
+  build:
+```
+
+---
+
+## 4. Steps
+
+A job is made up of multiple steps.
+
+Each step executes a command or an action.
+
+Example:
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - run: echo "Hello"
+```
+
+---
+
+## 5. Runs
+
+The actual execution of a workflow after it is triggered.
+
+Every time a workflow is triggered, a new workflow run is created.
+
+Example:
+
+```
+Push → Workflow Run Starts
+```
+
+---
+
+## 6. Runners
+
+A runner is the machine that executes the workflow.
+
+Types:
+
+* GitHub-hosted Runner
+* Self-hosted Runner
+
+Example:
+
+```yaml
+runs-on: ubuntu-latest
+```
+
+---
+
+# Workflow Hierarchy
+
+```
+Workflow
+│
+├── Jobs
+│   ├── Steps
+│   ├── Steps
+│   └── Steps
+│
+└── Jobs
+    ├── Steps
+    └── Steps
+```
+
+---
+
+# Easy Interview Summary
+
+* **Workflow** → Complete automation process.
+* **Trigger** → Event that starts the workflow.
+* **Job** → A group of steps executed on a runner.
+* **Step** → A single task or command.
+* **Action** → Reusable code that performs a task.
+* **Runner** → Machine that executes the workflow.
+* **Run** → One execution instance of the workflow.
+
+-------------------------------------------------------------------------
+Example :
+
+# Simple GitHub Actions Workflow Example
+
+Example:
+
+name: CI on Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print Message
+        run: echo "Hello, World!"
+
+----------------------------------------------------
+
+Explanation
+
+1. name
+- Gives a friendly name to the workflow.
+- Here the workflow name is "CI on Push".
+
+----------------------------------------------------
+
+2. on
+- Defines the workflow trigger.
+- This workflow starts whenever code is pushed to the main branch.
+
+on:
+  push:
+    branches:
+      - main
+
+----------------------------------------------------
+
+3. jobs
+- A workflow contains one or more jobs.
+- Here we have only one job named "build".
+
+jobs:
+  build:
+
+----------------------------------------------------
+
+4. runs-on
+- Specifies which runner will execute the job.
+- ubuntu-latest means a GitHub-hosted Ubuntu virtual machine.
+
+runs-on: ubuntu-latest
+
+----------------------------------------------------
+
+5. steps
+- A job is made up of one or more steps.
+- Steps execute one by one.
+
+steps:
+
+----------------------------------------------------
+
+6. uses
+- Executes a reusable action.
+- actions/checkout checks out the repository code onto the runner.
+
+- uses: actions/checkout@v4
+
+----------------------------------------------------
+
+7. run
+- Executes shell commands on the runner.
+
+- run: echo "Hello, World!"
+
+This prints the message in the workflow logs.
+
+----------------------------------------------------
+
+Workflow Execution Flow
+
+Developer
+    │
+    │ git push
+    ▼
+GitHub Repository
+    │
+    ▼
+Workflow Trigger (push)
+    │
+    ▼
+Workflow Starts
+    │
+    ▼
+Job (build)
+    │
+    ▼
+Runner (ubuntu-latest)
+    │
+    ▼
+Step 1 → Checkout Code
+    │
+    ▼
+Step 2 → Print "Hello, World!"
+    │
+    ▼
+Workflow Completed
+
+----------------------------------------------------
+
+Interview Summary
+
+Workflow → Complete automation process.
+Trigger (on) → Event that starts the workflow.
+Job → Group of related tasks.
+Runner → Machine where the job executes.
+Steps → Individual tasks inside a job.
+Action (uses) → Reusable automation (e.g., checkout).
+Run → Executes shell commands.

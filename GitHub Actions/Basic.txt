@@ -1,0 +1,36 @@
+Why Git Hub Actions ?
+
+GitHub Actions is popular because it is built into GitHub, easy to start with, and powerful enough for enterprise CI/CD pipelines. Most companies that store their code on GitHub prefer it because they don't need to maintain a separate CI server like Jenkins.
+
+Integrated with GitHub 
+No separate installation or server required.
+Every repository can have its own workflows under .github/workflows/.
+
+Event-driven automation
+No infrastructure to manage
+YAML-based configuration
+
+| Feature        | GitHub Actions                  | Jenkins                                             |
+| -------------- | ------------------------------- | --------------------------------------------------- |
+| Setup          | Built into GitHub               | Requires installation and maintenance               |
+| Infrastructure | GitHub-hosted runners available | You manage agents and controller                    |
+| Configuration  | YAML                            | Jenkinsfile (Groovy)                                |
+| Plugins        | Marketplace actions             | Large plugin ecosystem                              |
+| Maintenance    | Low                             | Higher (upgrades, plugins, backups)                 |
+| Best for       | GitHub repositories             | Complex enterprise environments or multi-SCM setups |
+
+
+
+----- What is Git Hub Action -------
+
+GitHub Actions is a CI/CD and workflow automation tool that is built directly into GitHub
+
+------ Different Types of Git Hub Action Events ------
+
+Triggers cause git hub action to run 
+the "on"  attribute specifies the event trigger to be used.
+---  on: [push]  (If something is pushed on the repo it job will run)
+Git Hub Actions has 35+ event triggers 
+Pushes : Triggers an action on any push to the repo
+Pull : Run actions when pull requests are opened, updated, or merged.
+Issues : Execute actions based on issue activities, like creation or labeling.
