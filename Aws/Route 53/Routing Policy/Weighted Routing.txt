@@ -1,0 +1,91 @@
+===========================================
+Route 53 - Weighted Routing
+===========================================
+
+What is Weighted Routing?
+-------------------------
+
+Weighted Routing distributes DNS responses based on assigned weights.
+
+It is used when multiple resources serve the same domain.
+
+--------------------------------------------------
+
+How it works?
+
+www.company.com
+
+↓
+
+Route 53
+
+↓
+
+ALB-1 (Weight = 90)
+
+ALB-2 (Weight = 10)
+
+Approximately:
+
+90% Users → ALB-1
+
+10% Users → ALB-2
+
+--------------------------------------------------
+
+Production Use Cases
+
+✔ Canary Deployment
+
+✔ Blue-Green Deployment
+
+✔ A/B Testing
+
+✔ Gradual Rollout
+
+--------------------------------------------------
+
+Example
+
+Old Application
+
+↓
+
+Weight = 90
+
+New Application
+
+↓
+
+Weight = 10
+
+If the new version is stable:
+
+90/10
+
+↓
+
+80/20
+
+↓
+
+50/50
+
+↓
+
+0/100
+
+--------------------------------------------------
+
+Important Point
+
+Route 53 distributes DNS responses.
+
+It does NOT load balance HTTP requests.
+
+--------------------------------------------------
+
+Interview Answer
+
+Weighted Routing allows Route 53 to distribute DNS queries among multiple resources based on configured weights. It is commonly used for canary deployments, blue-green deployments, and A/B testing.
+

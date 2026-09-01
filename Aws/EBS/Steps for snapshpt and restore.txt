@@ -1,0 +1,209 @@
+=========================================
+AWS EBS SNAPSHOT - CREATE & RESTORE STEPS
+=========================================
+
+Scenario:
+---------
+You have an EC2 instance with an attached EBS volume.
+
+EC2
+ │
+ ▼
+EBS Volume (100 GB)
+ │
+ ▼
+Filesystem
+ │
+ ▼
+Application Data
+
+------------------------------------------------------------
+
+Step 1: Create Snapshot
+-----------------------
+
+AWS Console
+↓
+EC2
+↓
+Volumes
+↓
+Select the EBS Volume
+↓
+Actions
+↓
+Create Snapshot
+↓
+Enter Description (Optional)
+↓
+Create Snapshot
+
+Result:
+
+EBS Volume
+     │
+     ▼
+Snapshot
+
+------------------------------------------------------------
+
+Step 2: Wait for Completion
+---------------------------
+
+Go to:
+
+EC2
+↓
+Snapshots
+
+Status should become:
+
+Completed
+
+------------------------------------------------------------
+
+Step 3: Restore the Snapshot
+----------------------------
+
+EC2
+↓
+Snapshots
+↓
+Select Snapshot
+↓
+Actions
+↓
+Create Volume
+
+Choose:
+- Availability Zone (same as EC2)
+- Volume Type (gp3, io2, etc.)
+- Size (same or larger)
+
+Result:
+
+Snapshot
+     │
+     ▼
+New EBS Volume
+
+------------------------------------------------------------
+
+Step 4: Attach the New Volume
+-----------------------------
+
+EC2
+↓
+Volumes
+↓
+Select New Volume
+↓
+Actions
+↓
+Attach Volume
+↓
+Select EC2 Instance
+↓
+Attach
+
+Now Linux detects a new disk.
+
+------------------------------------------------------------
+
+Step 5: Verify in Linux
+-----------------------
+
+lsblk
+
+Example:
+
+nvme0n1      8G
+└─nvme0n1p1  /
+
+nvme1n1    100G
+└─nvme1n1p1
+
+------------------------------------------------------------
+
+Step 6: Create Mount Point
+--------------------------
+
+sudo mkdir /restore
+
+------------------------------------------------------------
+
+Step 7: Mount the Volume
+------------------------
+
+sudo mount /dev/nvme1n1p1 /restore
+
+------------------------------------------------------------
+
+Step 8: Verify Data
+-------------------
+
+df -h
+
+ls /restore
+
+You should see:
+
+Application files
+Logs
+Database
+Directories
+
+The filesystem and all data from the snapshot are restored.
+
+------------------------------------------------------------
+
+Flow Diagram
+------------
+
+Original EC2
+      │
+      ▼
+EBS Volume
+      │
+      ▼
+Create Snapshot
+      │
+      ▼
+Snapshot
+      │
+      ▼
+Create New Volume
+      │
+      ▼
+Attach to EC2
+      │
+      ▼
+lsblk
+      │
+      ▼
+mkdir /restore
+      │
+      ▼
+mount
+      │
+      ▼
+Access Data
+
+------------------------------------------------------------
+
+Production Use Cases
+--------------------
+
+✔ Backup before application deployment
+✔ Backup before OS patching
+✔ Disaster Recovery
+✔ Clone production data to a test server
+✔ Recover deleted EC2 instances
+✔ Migrate data to another EC2 instance
+
+------------------------------------------------------------
+
+Interview Answer
+----------------
+
+To restore an EBS snapshot, I first create a snapshot of the source EBS volume. When recovery is needed, I create a new EBS volume from that snapshot, attach it to an EC2 instance, verify the disk using `lsblk`, create a mount point if needed, mount the filesystem, and verify the data. Although EBS snapshots are incremental in storage, AWS reconstructs the complete volume during restore, so the restored volume contains the full filesystem and all data as of the snapshot.

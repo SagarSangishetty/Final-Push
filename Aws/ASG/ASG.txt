@@ -1,0 +1,153 @@
+===========================================
+Auto Scaling Group (ASG)
+===========================================
+
+What is ASG?
+
+Auto Scaling Group automatically launches, terminates, and replaces EC2 instances.
+
+It ensures the desired number of healthy instances are always available.
+
+--------------------------------------------------
+
+Responsibilities
+
+ALB
+
+↓
+
+Distributes traffic.
+
+----------------------------
+
+ASG
+
+↓
+
+Manages EC2 instances.
+
+--------------------------------------------------
+
+Three Important Values
+
+Minimum Capacity
+
+- Minimum number of EC2 instances.
+
+Desired Capacity
+
+- Number of EC2 instances ASG tries to maintain.
+
+Maximum Capacity
+
+- Maximum number of EC2 instances ASG can launch.
+
+--------------------------------------------------
+
+Scaling Out
+
+CloudWatch
+
+↓
+
+CPU > 80%
+
+↓
+
+Scaling Policy
+
+↓
+
+Launch New EC2
+
+↓
+
+Register with Target Group
+
+↓
+
+Health Check
+
+↓
+
+ALB starts routing traffic.
+
+--------------------------------------------------
+
+Scaling In
+
+CloudWatch
+
+↓
+
+CPU < 20%
+
+↓
+
+Scaling Policy
+
+↓
+
+Terminate EC2
+
+↓
+
+Deregister from Target Group
+
+↓
+
+Existing requests complete
+
+↓
+
+Terminate Instance
+
+--------------------------------------------------
+
+If EC2 Crashes
+
+ALB
+
+↓
+
+Marks target unhealthy
+
+↓
+
+Stops sending traffic
+
+↓
+
+ASG launches replacement EC2
+
+--------------------------------------------------
+
+Production Flow
+
+Internet
+
+↓
+
+Route53
+
+↓
+
+ALB
+
+↓
+
+Target Group
+
+↓
+
+Auto Scaling Group
+
+↓
+
+EC2
+
+--------------------------------------------------
+
+Interview Answer
+
+Auto Scaling Group automatically launches, terminates, and replaces EC2 instances based on scaling policies or health checks. It works together with CloudWatch, Target Groups, and Application Load Balancers to maintain application availability and scale according to demand.

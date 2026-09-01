@@ -1,0 +1,132 @@
+===========================================
+AWS Secrets Manager
+===========================================
+
+What is Secrets Manager?
+
+AWS Secrets Manager is a managed service used to securely store and manage sensitive information such as passwords, API keys and database credentials.
+
+--------------------------------------------------
+
+Why use Secrets Manager?
+
+Instead of hardcoding passwords inside the application, store them securely in AWS.
+
+Application fetches the secret at runtime.
+
+--------------------------------------------------
+
+Secrets can store
+
+- Database Username
+- Database Password
+- API Keys
+- JWT Secrets
+- OAuth Tokens
+- Third-party Credentials
+
+--------------------------------------------------
+
+Production Flow
+
+Application
+
+↓
+
+IAM Role
+
+↓
+
+AWS Secrets Manager
+
+↓
+
+Returns Secret
+
+↓
+
+Application connects to RDS
+
+--------------------------------------------------
+
+Benefits
+
+✔ No Hardcoded Passwords
+
+✔ Secure Storage
+
+✔ KMS Encryption
+
+✔ IAM Access Control
+
+✔ Automatic Secret Rotation
+
+✔ Audit Logging (CloudTrail)
+
+--------------------------------------------------
+
+Automatic Rotation
+
+Secrets Manager can automatically rotate passwords.
+
+Example
+
+Every 30 days
+
+↓
+
+Generate New Password
+
+↓
+
+Update Database
+
+↓
+
+Application reads latest password
+
+--------------------------------------------------
+
+Integration with RDS
+
+Application
+
+↓
+
+Secrets Manager
+
+↓
+
+Username + Password
+
+↓
+
+RDS Connection
+
+--------------------------------------------------
+
+Integration with Kubernetes
+
+AWS Secrets Manager
+
+↓
+
+IAM Role (IRSA)
+
+↓
+
+External Secrets Operator
+
+↓
+
+Kubernetes Secret
+
+↓
+
+Pod
+
+--------------------------------------------------
+
+Interview Answer
+
+AWS Secrets Manager securely stores sensitive information such as database credentials, API keys and tokens. Applications retrieve secrets securely using IAM permissions instead of hardcoding them in the source code. Secrets are encrypted using AWS KMS and can be automatically rotated for improved security.

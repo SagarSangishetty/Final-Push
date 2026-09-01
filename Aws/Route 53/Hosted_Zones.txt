@@ -1,0 +1,109 @@
+===========================================
+Hosted Zone
+===========================================
+
+What is a Hosted Zone?
+
+A Hosted Zone is a container that stores all DNS records for a domain.
+
+It tells Route 53 how to resolve domain names.
+
+Example
+
+Domain
+
+ecommerce.com
+
+↓
+
+Hosted Zone
+
+↓
+
+DNS Records
+
+--------------------------------------------------
+
+Example Records
+
+www.ecommerce.com
+
+↓
+
+Application Load Balancer
+
+api.ecommerce.com
+
+↓
+
+EKS Load Balancer
+
+mail.ecommerce.com
+
+↓
+
+Google Workspace
+
+--------------------------------------------------
+
+Types of Hosted Zones
+
+1. Public Hosted Zone
+
+Accessible from the Internet.
+
+Example
+
+www.company.com
+
+↓
+
+Public Website
+
+--------------------------------------------------
+
+2. Private Hosted Zone
+
+Accessible only inside a VPC.
+
+Example
+
+db.internal.company
+
+↓
+
+10.0.1.25
+
+Only EC2 instances inside the VPC can resolve it.
+
+--------------------------------------------------
+
+Production Flow
+
+User
+
+↓
+
+Route 53
+
+↓
+
+Hosted Zone
+
+↓
+
+DNS Record
+
+↓
+
+Application Load Balancer
+
+↓
+
+EC2
+
+--------------------------------------------------
+
+Interview Answer
+
+A Hosted Zone is a container in Route 53 that stores DNS records for a domain. Route 53 looks up these records to resolve domain names to IP addresses or AWS resources. Public Hosted Zones are used for internet-facing domains, while Private Hosted Zones are used for internal DNS resolution within a VPC.

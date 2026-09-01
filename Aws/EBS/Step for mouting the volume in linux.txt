@@ -1,0 +1,145 @@
+lsblk                      # See the new disk
+sudo fdisk /dev/nvme1n1    # Create partition
+sudo mkfs.ext4 /dev/nvme1n1p1
+sudo mkdir /data
+sudo mount /dev/nvme1n1p1 /data
+sudo blkid                 # Get UUID
+sudo vi /etc/fstab         # Permanent mount
+
+----------------------------------------------------------------
+
+
+1. lsblk
+--------
+
+Command:
+lsblk
+
+Meaning:
+Lists all disks and partitions connected to Linux.
+
+Think:
+"Show me all the hard disks."
+
+Example Output:
+
+nvme0n1   8G     (Root Disk)
+nvme1n1 100G     (New EBS Disk)
+
+------------------------------------------------------------
+
+2. fdisk
+---------
+
+Command:
+sudo fdisk /dev/nvme1n1
+
+Meaning:
+Creates partitions on the disk.
+
+Think:
+"I am dividing the hard disk into usable sections."
+
+Result:
+
+Before:
+Disk
+┌───────────────┐
+│ 100 GB Empty  │
+└───────────────┘
+
+After:
+Disk
+┌───────────────┐
+│ Partition 1   │
+└───────────────┘
+
+Creates:
+/dev/nvme1n1p1
+
+------------------------------------------------------------
+
+3. mkfs.ext4
+------------
+
+Command:
+sudo mkfs.ext4 /dev/nvme1n1p1
+
+Meaning:
+Formats the partition with the ext4 filesystem.
+
+Think:
+"I am preparing the partition so Linux can store files."
+
+Without this:
+Linux cannot store files.
+
+------------------------------------------------------------
+
+4. mkdir
+---------
+
+Command:
+sudo mkdir /data
+
+Meaning:
+Creates a directory (mount point).
+
+Think:
+"I am creating a folder where the new disk will appear."
+
+------------------------------------------------------------
+
+5. mount
+---------
+
+Command:
+sudo mount /dev/nvme1n1p1 /data
+
+Meaning:
+Attaches the filesystem to the directory.
+
+Think:
+"Connect this disk to the /data folder."
+
+Now when you access:
+
+/data
+
+you are actually accessing the new EBS volume.
+
+------------------------------------------------------------
+
+6. blkid
+---------
+
+Command:
+sudo blkid
+
+Meaning:
+Displays the UUID of the filesystem.
+
+Think:
+"Give me the unique identity of this disk."
+
+Example:
+
+UUID=37a52016-c66c-4d50-8a44-81ff625ec78e
+
+------------------------------------------------------------
+
+7. /etc/fstab
+-------------
+
+Command:
+sudo vi /etc/fstab
+
+Meaning:
+Configures filesystems to mount automatically during boot.
+
+Think:
+"Tell Linux to mount this disk every time the server starts."
+
+Example Entry:
+
+UUID=37a52016-c66c-4d50-8a44-81ff625ec78e /data ext4 defaults,nofail 0 2

@@ -1,0 +1,277 @@
+KUBERNETES SCHEDULING — TAINTS, TOLERATIONS, NODE SELECTOR & NODE AFFINITY
+
+==================================================
+
+KUBERNETES SCHEDULER
+==================================================
+
+Scheduler decides which worker node a Pod should run on.
+
+It checks things like:
+
+CPU and memory requests
+Node availability
+Taints and tolerations
+Node selector
+Node affinity
+Other scheduling constraints
+
+Flow:
+
+Pod created
+↓
+API Server
+↓
+Scheduler
+↓
+Selects suitable Node
+↓
+Kubelet
+↓
+Container Runtime
+↓
+Container starts
+
+==================================================
+2. TAINT
+
+Taint is configured on the NODE.
+
+Purpose:
+Prevent unwanted Pods from being scheduled on a particular Node.
+
+Example:
+
+dedicated=monitoring:NoSchedule
+
+Meaning:
+
+"Don't schedule normal Pods on this Node unless they have a matching toleration."
+
+Example:
+
+Node 1 → General
+Node 2 → General
+Node 3 → Monitoring
+
+Node 3 has:
+
+dedicated=monitoring:NoSchedule
+
+==================================================
+3. TOLERATION
+
+Toleration is configured on the POD.
+
+Purpose:
+Allows a Pod to be scheduled on a Node that has a matching taint.
+
+Example:
+
+toleration:
+dedicated=monitoring
+effect=NoSchedule
+
+Meaning:
+
+"This Pod is allowed to run on a Node with the monitoring taint."
+
+IMPORTANT:
+
+Toleration does NOT force the Pod onto that Node.
+
+It only allows the Pod to pass the taint restriction.
+
+Other scheduling rules still apply.
+
+==================================================
+4. NODE LABEL
+
+A Node can have labels.
+
+Example:
+
+workload=monitoring
+
+or:
+
+disk=ssd
+
+or:
+
+workload=gpu
+
+Labels are used by Pods to select suitable Nodes.
+
+==================================================
+5. NODE SELECTOR
+
+Node Selector is configured on the POD.
+
+Purpose:
+Tell Kubernetes that the Pod can only run on a Node with a specific label.
+
+Example:
+
+nodeSelector:
+workload: monitoring
+
+If:
+
+Node 1 → workload=general
+Node 2 → workload=monitoring
+Node 3 → workload=general
+
+The Pod can run on Node 2.
+
+==================================================
+6. NODE AFFINITY
+
+Node Affinity is configured on the POD.
+
+It is a more flexible version of Node Selector.
+
+It allows us to define:
+
+Required node affinity
+Preferred node affinity
+
+Required:
+
+"I MUST run on a Node with this label."
+
+Preferred:
+
+"I PREFER this type of Node, but another suitable Node is acceptable."
+
+==================================================
+7. TAINT vs TOLERATION
+
+Taint:
+Configured on Node.
+
+Purpose:
+Restricts Pods.
+
+Toleration:
+Configured on Pod.
+
+Purpose:
+Allows Pod to run on a tainted Node.
+
+Easy memory:
+
+Taint = Node says "Don't come here."
+
+Toleration = Pod says "I'm allowed here."
+
+==================================================
+8. NODE SELECTOR vs NODE AFFINITY
+
+Node Selector:
+Simple label-based Node selection.
+
+Node Affinity:
+More flexible label-based Node selection.
+
+Node Selector:
+
+"I require this label."
+
+Node Affinity:
+
+"I require OR prefer this label."
+
+==================================================
+9. COMBINING THEM
+
+Companies can combine these mechanisms.
+
+Example:
+
+Observability Nodes:
+
+workload=observability
+
+Node also has:
+
+workload=observability:NoSchedule
+
+Pod has:
+
+Toleration
+→ Allows it onto the Node
+Node Selector/Affinity
+→ Makes it target the observability Node
+
+Flow:
+
+Node
+↓
+Taint = "Keep normal Pods away"
+↓
+Pod
+↓
+Toleration = "I am allowed"
+↓
+Node Selector/Affinity = "I want this Node"
+
+==================================================
+10. REAL COMPANY EXAMPLE
+
+Dedicated monitoring nodes:
+
+Node 1 → General
+Node 2 → General
+Node 3 → Observability
+Node 4 → Observability
+
+Labels:
+
+workload=observability
+
+Taint:
+
+workload=observability:NoSchedule
+
+Prometheus/Grafana Pods:
+
+Toleration
++
+Node Selector/Affinity
+
+Result:
+
+Normal application Pods
+→ Stay away from observability Nodes
+
+Monitoring Pods
+→ Allowed and targeted to observability Nodes
+
+==================================================
+11. INTERVIEW CHEAT SHEET
+
+Scheduler
+→ Selects suitable Node for a Pod.
+
+Taint
+→ Node restriction.
+
+Toleration
+→ Pod is allowed past Node restriction.
+
+Node Selector
+→ Pod requires a Node with a specific label.
+
+Node Affinity
+→ Pod requires or prefers Nodes based on labels.
+
+MOST IMPORTANT:
+
+Toleration answers:
+"Can I run here?"
+
+Node Selector/Affinity answers:
+"Where do I want/need to run?"
+
+==================================================

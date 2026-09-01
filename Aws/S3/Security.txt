@@ -1,0 +1,193 @@
+===========================================
+How is Amazon S3 Secured?
+===========================================
+
+Amazon S3 is secured using multiple layers of security.
+
+1. IAM (Identity and Access Management)
+---------------------------------------
+
+Controls WHO can access the bucket.
+
+Example:
+- Allow Upload
+- Allow Download
+- Deny Delete
+- Allow Read Only
+
+Permissions are given to:
+- Users
+- Groups
+- Roles
+
+Example:
+EC2 Role
+↓
+Can Upload Objects
+Cannot Delete Bucket
+
+--------------------------------------------------
+
+2. Bucket Policy
+----------------
+
+Bucket Policy controls access at the bucket level.
+
+It can define:
+
+- Which AWS Account can access
+- Which IAM Role can access
+- Which IP Address can access
+- Which VPC Endpoint can access
+- Allow or Deny specific actions
+
+Think of it as the bucket's own security guard.
+
+--------------------------------------------------
+
+3. Block Public Access
+----------------------
+
+Enabled by default.
+
+Prevents accidental public exposure of buckets and objects.
+
+Even if someone writes a public bucket policy,
+AWS blocks public access when this setting is enabled.
+
+Production:
+Always keep Block Public Access enabled unless public access is intentionally required.
+
+--------------------------------------------------
+
+4. Encryption
+-------------
+
+Protects data stored in S3.
+
+Types:
+
+a) SSE-S3
+- AWS manages encryption keys.
+
+b) SSE-KMS
+- AWS KMS manages encryption keys.
+- Customer controls the key.
+- Supports auditing.
+- Most common in production.
+
+c) SSE-C
+- Customer provides encryption keys.
+- Rarely used.
+
+--------------------------------------------------
+
+5. HTTPS (Encryption in Transit)
+--------------------------------
+
+Data is encrypted while moving between the client and S3.
+
+Application
+      ↓
+HTTPS (TLS)
+      ↓
+Amazon S3
+
+Prevents data interception over the network.
+
+--------------------------------------------------
+
+6. Versioning
+-------------
+
+Protects against accidental deletion or overwriting.
+
+Example:
+
+report.pdf (Version 1)
+
+↓
+
+New Upload
+
+↓
+
+report.pdf (Version 2)
+
+Old version can still be restored.
+
+--------------------------------------------------
+
+7. CloudTrail & Access Logging
+------------------------------
+
+Used for auditing.
+
+Tracks operations such as:
+
+- GetObject
+- PutObject
+- DeleteObject
+- CreateBucket
+- DeleteBucket
+
+Helps identify:
+
+Who accessed?
+When?
+What action was performed?
+
+--------------------------------------------------
+
+8. Pre-Signed URL
+-----------------
+
+Provides temporary access to private objects.
+
+Example:
+
+Generate URL
+
+↓
+
+Valid for 10 Minutes
+
+↓
+
+User Downloads File
+
+↓
+
+URL Expires Automatically
+
+No need to make the bucket public.
+
+--------------------------------------------------
+
+Production Security Architecture
+--------------------------------
+
+Application
+      │
+IAM Role
+      │
+Bucket Policy
+      │
+Block Public Access
+      │
+SSE-KMS Encryption
+      │
+HTTPS Communication
+      │
+Versioning Enabled
+      │
+CloudTrail Logging
+      │
+Amazon S3
+
+--------------------------------------------------
+
+Interview Answer
+----------------
+
+Amazon S3 is secured using multiple layers. IAM policies and Bucket Policies control who can access the bucket and objects. Block Public Access prevents accidental public exposure. Data is encrypted at rest using SSE-S3 or SSE-KMS and encrypted in transit using HTTPS. Versioning protects against accidental deletion or overwriting, while CloudTrail provides auditing of all S3 API activities. For temporary secure access, Pre-Signed URLs are used instead of making objects public.

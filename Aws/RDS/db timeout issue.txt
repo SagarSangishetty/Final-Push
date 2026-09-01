@@ -1,0 +1,41 @@
+User reports:
+
+↓
+
+Application cannot connect to RDS
+
+↓
+
+1. Any recent deployment/config change?
+
+↓
+
+2. Is RDS Available?
+
+↓
+
+3. Same VPC?
+
+↓
+
+4. Security Groups
+
+↓
+
+5. Can I reach port 5432?
+
+↓
+
+6. DNS Resolution
+
+↓
+
+7. Username/Password
+
+↓
+
+8. Database Logs
+
+↓
+
+Root Cause Found

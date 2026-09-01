@@ -1,0 +1,6 @@
+| Record           | Purpose                 | Interview Frequency |
+| ---------------- | ----------------------- | ------------------- |
+| **A Record**     | Domain → IPv4 Address   | ⭐⭐⭐⭐⭐               |
+| **CNAME**        | Domain → Another Domain | ⭐⭐⭐⭐⭐               |
+| **Alias Record** | Domain → AWS Resource   | ⭐⭐⭐⭐⭐               |
+| **AAAA Record**  | Domain → IPv6 Address   | ⭐⭐⭐                 |

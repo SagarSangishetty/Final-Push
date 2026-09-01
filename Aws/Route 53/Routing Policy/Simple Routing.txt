@@ -1,0 +1,147 @@
+===========================================
+Route 53 - Simple Routing
+===========================================
+
+What is Simple Routing?
+-----------------------
+
+Simple Routing is the default routing policy in Route 53.
+
+It is used when a domain points to a single resource.
+
+Route 53 always returns the same endpoint for every DNS request.
+
+There is no decision making.
+
+--------------------------------------------------
+
+How it works?
+
+User
+
+↓
+
+www.company.com
+
+↓
+
+Route 53
+
+↓
+
+Returns the same endpoint
+
+↓
+
+Application Load Balancer / EC2
+
+--------------------------------------------------
+
+Example 1
+
+www.company.com
+
+↓
+
+Application Load Balancer
+
+↓
+
+EC2-1
+EC2-2
+EC2-3
+
+Route 53 always returns the ALB.
+
+The ALB is responsible for distributing traffic to the EC2 instances.
+
+--------------------------------------------------
+
+Example 2
+
+api.company.com
+
+↓
+
+Elastic IP of EC2
+
+Route 53 always returns the same Elastic IP.
+
+--------------------------------------------------
+
+When to use?
+
+✔ Single EC2
+
+✔ Single Application Load Balancer
+
+✔ Single S3 Static Website
+
+✔ Single CloudFront Distribution
+
+✔ Single Region Deployment
+
+--------------------------------------------------
+
+When NOT to use?
+
+✘ Multiple Regions
+
+✘ Blue-Green Deployment
+
+✘ Canary Deployment
+
+✘ Disaster Recovery
+
+✘ Load Distribution Across Multiple Endpoints
+
+For these cases, use other routing policies such as:
+
+- Weighted Routing
+- Failover Routing
+- Latency Routing
+- Geolocation Routing
+
+--------------------------------------------------
+
+Production Architecture
+
+Internet
+
+↓
+
+www.company.com
+
+↓
+
+Route 53
+
+↓
+
+Simple Routing
+
+↓
+
+Application Load Balancer
+
+↓
+
+EC2-1
+EC2-2
+EC2-3
+
+--------------------------------------------------
+
+Important Point
+
+Route 53 does NOT load balance between EC2 instances.
+
+It only returns the ALB.
+
+The ALB performs the load balancing.
+
+--------------------------------------------------
+
+Interview Answer
+
+Simple Routing is the default Route 53 routing policy. It is used when a domain points to a single resource such as an Application Load Balancer, EC2 instance with an Elastic IP, CloudFront distribution, or S3 static website. Route 53 always returns the same endpoint, and if the endpoint is an ALB, the ALB is responsible for distributing traffic to backend instances.

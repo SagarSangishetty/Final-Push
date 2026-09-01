@@ -1,0 +1,33 @@
+CloudWatch
+
+↓
+
+Scaling Policy
+
+↓
+
+Auto Scaling Group
+
+↓
+
+Launch Template
+
+↓
+
+New EC2
+
+↓
+
+ASG registers EC2 with Target Group
+
+↓
+
+ALB Health Check
+
+↓
+
+Healthy
+
+↓
+
+ALB starts routing traffic

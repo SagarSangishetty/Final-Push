@@ -1,0 +1,71 @@
+========================================================
+
+Route 53 - Geolocation Routing
+===========================================
+
+What is Geolocation Routing?
+----------------------------
+
+Geolocation Routing directs users based on their geographic location.
+
+--------------------------------------------------
+
+Example
+
+India
+
+↓
+
+Indian Website
+
+----------------------------
+
+USA
+
+↓
+
+US Website
+
+----------------------------
+
+Europe
+
+↓
+
+EU Website
+
+--------------------------------------------------
+
+Production Use Cases
+
+✔ Country Specific Websites
+
+✔ Language Based Websites
+
+✔ Legal Compliance
+
+✔ Regional Content
+
+--------------------------------------------------
+
+Example
+
+User from India
+
+↓
+
+hi.company.com
+
+----------------------------
+
+User from USA
+
+↓
+
+us.company.com
+
+--------------------------------------------------
+
+Interview Answer
+
+Geolocation Routing directs traffic based on the user's geographic location, such as country or continent. It is useful when different regions require different content or applications.

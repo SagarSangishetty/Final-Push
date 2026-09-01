@@ -1,0 +1,115 @@
+
+===========================================
+Amazon RDS Security
+===========================================
+
+Goal
+
+Protect the database from unauthorized access.
+
+--------------------------------------------------
+
+1. Private Subnet
+
+RDS is deployed inside a private subnet.
+
+It does not have a public IP.
+
+Users cannot connect directly from the Internet.
+
+--------------------------------------------------
+
+2. Security Groups
+
+Only application servers are allowed to connect.
+
+Example
+
+EC2 Security Group
+
+↓
+
+Allow Port 5432
+
+↓
+
+RDS Security Group
+
+All other traffic is denied.
+
+--------------------------------------------------
+
+3. Authentication
+
+Application connects using:
+
+- RDS Endpoint
+- Username
+- Password
+
+Passwords should not be hardcoded.
+
+Use AWS Secrets Manager.
+
+--------------------------------------------------
+
+4. Encryption
+
+Encryption At Rest
+
+↓
+
+Database storage encrypted using AWS KMS.
+
+Encryption In Transit
+
+↓
+
+SSL/TLS used between Application and RDS.
+
+--------------------------------------------------
+
+Production Architecture
+
+Internet
+
+↓
+
+ALB
+
+↓
+
+EC2
+
+↓
+
+Secrets Manager
+
+↓
+
+SSL Connection
+
+↓
+
+RDS (Private Subnet)
+
+--------------------------------------------------
+
+Production Troubleshooting
+
+If EC2 cannot connect to RDS:
+
+1. Check Security Groups.
+2. Verify Port (5432 for PostgreSQL).
+3. Verify RDS is running.
+4. Verify VPC/Subnet routing.
+5. Verify Username/Password.
+6. Verify Secrets Manager.
+7. Verify DNS Resolution.
+8. Verify SSL Configuration.
+
+--------------------------------------------------
+
+Interview Answer
+
+Amazon RDS is typically deployed in a private subnet and protected using Security Groups. Only application servers are allowed to connect. Credentials are securely stored in AWS Secrets Manager, and communication is encrypted using SSL/TLS. Data stored in RDS can also be encrypted at rest using AWS KMS.

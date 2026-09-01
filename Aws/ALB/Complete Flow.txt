@@ -1,0 +1,45 @@
+User
+
+↓
+
+https://www.company.com
+
+↓
+
+Route 53
+
+↓
+
+Application Load Balancer
+
+↓
+
+Listener (443)
+
+↓
+
+SSL Termination (Decrypt Request)
+
+↓
+
+Listener Rules
+
+↓
+
+Frontend Target Group
+
+↓
+
+Healthy EC2
+
+↓
+
+Response
+
+↓
+
+ALB Encrypts Response
+
+↓
+
+Browser

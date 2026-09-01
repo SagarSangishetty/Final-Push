@@ -1,0 +1,79 @@
+1. Encryption
+
+Almost every production EBS volume is encrypted.
+
+KMS Key
+
+↓
+
+Encrypted EBS
+
+↓
+
+EC2
+
+Even if someone copies the snapshot,
+
+they cannot read it without KMS permissions
+
+
+
+2. IAM
+
+Only specific IAM roles can
+
+Create snapshots
+Delete volumes
+Attach volumes
+
+Example policy:
+
+Allow
+
+ec2:AttachVolume
+
+ec2:DetachVolume
+
+ec2:CreateSnapshot
+
+
+3. Snapshot Backups
+
+Companies take automated snapshots.
+
+Daily
+
+Weekly
+
+Monthly
+
+Usually managed using:
+
+AWS Backup
+Amazon Data Lifecycle Manager (DLM)
+
+
+5. Linux File Permissions
+
+Even if a volume is attached,
+
+users still need Linux permissions.
+
+Example:
+
+chmod 700 /data
+
+chown appuser:appgroup /data
+
+Only the application user can access the data.
+
+
+| Mount Point | EBS Volume                     | Purpose                   |
+| ----------- | ------------------------------ | ------------------------- |
+| `/`         | 100 GB gp3                     | Operating System          |
+| `/var/log`  | 200 GB gp3                     | Application & system logs |
+| `/data`     | 1 TB io2                       | Application data          |
+| `/backup`   | 2 TB st1                       | Backups                   |
+| `/tmp`      | Root volume or separate volume | Temporary files           |
+
+

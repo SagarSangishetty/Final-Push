@@ -1,0 +1,94 @@
+========================================================
+
+Route 53 - Failover Routing
+===========================================
+
+What is Failover Routing?
+-------------------------
+
+Failover Routing provides automatic Disaster Recovery.
+
+Traffic goes to the Primary endpoint.
+
+If the Primary becomes unhealthy,
+
+Route 53 automatically returns the Secondary endpoint.
+
+--------------------------------------------------
+
+How it works?
+
+User
+
+↓
+
+Route 53
+
+↓
+
+Primary ALB
+
+↓
+
+Health Check
+
+↓
+
+Healthy?
+
+↓
+
+YES
+
+↓
+
+Primary
+
+----------------------------
+
+If NO
+
+↓
+
+Secondary ALB
+
+--------------------------------------------------
+
+Production Example
+
+Mumbai Region
+
+↓
+
+Primary
+
+----------------------------
+
+Hyderabad Region
+
+↓
+
+Secondary
+
+--------------------------------------------------
+
+Use Cases
+
+✔ Disaster Recovery
+
+✔ High Availability
+
+✔ Business Continuity
+
+--------------------------------------------------
+
+Important Point
+
+Requires Route 53 Health Checks.
+
+--------------------------------------------------
+
+Interview Answer
+
+Failover Routing is used for disaster recovery. Route 53 continuously monitors the primary endpoint using health checks. If it becomes unhealthy, Route 53 automatically returns the secondary endpoint.
+

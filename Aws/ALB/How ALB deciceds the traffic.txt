@@ -1,0 +1,67 @@
+===========================================
+How ALB Selects an EC2 Instance
+===========================================
+
+Step 1
+
+ALB performs Health Checks.
+
+Only healthy targets receive traffic.
+
+Unhealthy targets are automatically removed.
+
+--------------------------------------------
+
+Step 2
+
+ALB distributes traffic among healthy targets.
+
+Default algorithm:
+
+Round Robin
+
+Example
+
+Request 1 → EC2-1
+
+Request 2 → EC2-2
+
+Request 3 → EC2-3
+
+Request 4 → EC2-1
+
+...
+
+--------------------------------------------
+
+If an EC2 becomes unhealthy
+
+↓
+
+ALB removes it from the Target Group.
+
+↓
+
+Traffic is sent only to healthy instances.
+
+--------------------------------------------
+
+Important Point
+
+ALB does NOT look at:
+
+✘ CPU Utilization
+
+✘ Memory Usage
+
+✘ Disk Usage
+
+ALB only checks whether the target is healthy.
+
+CPU-based scaling is handled by Auto Scaling.
+
+--------------------------------------------
+
+Interview Answer
+
+An Application Load Balancer first performs health checks to identify healthy targets. It then distributes incoming HTTP/HTTPS requests among the healthy targets using the Round Robin algorithm by default. Unhealthy targets are automatically removed until they become healthy again.

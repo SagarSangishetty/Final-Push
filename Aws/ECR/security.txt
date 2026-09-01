@@ -1,0 +1,160 @@
+How ECR is Secured?
+-------------------
+
+1. IAM
+
+Controls who can:
+
+- Push Images
+- Pull Images
+- Delete Images
+- Create Repository
+
+Example:
+
+CI/CD Role
+
+↓
+
+Push Image
+
+EKS Node Role
+
+↓
+
+Pull Image
+
+--------------------------------------------------
+
+2. Repository Policy
+
+Controls access to a specific repository.
+
+Can allow another AWS Account to pull images.
+
+Example:
+
+Production Account
+
+↓
+
+Pull images
+
+Development Account
+
+↓
+
+Push images
+
+--------------------------------------------------
+
+3. Encryption
+
+Images stored in ECR are encrypted.
+
+Uses:
+
+- AES-256
+- AWS KMS (Optional)
+
+Production:
+
+SSE-KMS is commonly used.
+
+--------------------------------------------------
+
+4. HTTPS
+
+Images are pushed and pulled securely using HTTPS.
+
+Developer
+      │
+HTTPS
+      │
+Amazon ECR
+
+--------------------------------------------------
+
+5. Image Scanning
+
+Automatically scans Docker images for vulnerabilities.
+
+Detects:
+
+- Critical
+- High
+- Medium
+- Low
+
+Production:
+
+Fail CI/CD pipeline if Critical vulnerabilities are found.
+
+--------------------------------------------------
+
+6. Authentication
+
+Before pushing or pulling images:
+
+aws ecr get-login-password
+
+↓
+
+docker login
+
+↓
+
+docker push
+
+Only authenticated users can access repositories.
+
+--------------------------------------------------
+
+7. Image Tags
+
+Never deploy using:
+
+latest
+
+Use version tags:
+
+v1.0
+v1.1
+build-125
+git-sha
+
+Production:
+
+ecommerce:2a4d5f6
+
+--------------------------------------------------
+
+8. Lifecycle Policy
+
+Automatically deletes old images.
+
+Example:
+
+Keep Last 20 Images
+
+Delete everything older than 90 days.
+
+Helps reduce storage cost.
+
+--------------------------------------------------
+
+9. CloudTrail
+
+Tracks API operations.
+
+Example:
+
+Create Repository
+
+Delete Repository
+
+Push Image
+
+Delete Image
+
+--------------------------------------------------

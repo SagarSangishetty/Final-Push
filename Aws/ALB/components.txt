@@ -1,0 +1,112 @@
+===========================================
+Application Load Balancer Components
+===========================================
+
+1. Listener
+
+- Entry point of the ALB.
+- Listens on a specific protocol and port.
+- Example:
+  HTTP  -> Port 80
+  HTTPS -> Port 443
+
+Job:
+Accept incoming requests.
+
+--------------------------------------------------
+
+2. Listener Rules
+
+Rules decide where the request should go.
+
+Example
+
+/api/*
+
+↓
+
+API Target Group
+
+/images/*
+
+↓
+
+Images Target Group
+
+Default
+
+↓
+
+Frontend Target Group
+
+--------------------------------------------------
+
+3. Target Group
+
+A logical group of backend targets.
+
+Targets can be:
+
+✔ EC2
+
+✔ ECS
+
+✔ EKS Pods
+
+✔ Lambda
+
+The ALB forwards traffic to a Target Group.
+
+--------------------------------------------------
+
+4. Targets
+
+Actual backend resources.
+
+Example
+
+EC2-1
+
+EC2-2
+
+EC2-3
+
+--------------------------------------------------
+
+Complete Flow
+
+Internet
+
+↓
+
+Route53
+
+↓
+
+ALB
+
+↓
+
+Listener
+
+↓
+
+Listener Rule
+
+↓
+
+Target Group
+
+↓
+
+Healthy Target
+
+↓
+
+Application
+
+--------------------------------------------------
+
+Interview Answer
+
+The request first reaches the ALB Listener, which accepts traffic on a configured port such as 80 or 443. The Listener evaluates Listener Rules based on the request path or host header and forwards the request to the appropriate Target Group. The Target Group contains healthy backend targets such as EC2 instances, ECS tasks, EKS pods, or Lambda functions.

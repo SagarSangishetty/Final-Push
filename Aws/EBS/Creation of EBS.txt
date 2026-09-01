@@ -1,0 +1,59 @@
+EBS -- 
+
+How it is created in companies.
+
+Usually volumes are created mount based. 
+
+Example - 
+
+EC2 Instance
+│
+├── Root EBS Volume (100 GB)
+│      ├── /
+│      ├── /etc
+│      ├── /usr
+│      └── /var
+│
+├── EBS Volume 2 (500 GB)
+│      └── /data
+│
+├── EBS Volume 3 (1 TB)
+│      └── /backup
+│
+└── EBS Volume 4 (Database Logs)
+       └── /db-logs
+
+Isolation : If logs are full OS mount is not impacted.
+
+Different Performance Requirements : Different workloads require different EBS types.
+
+Root
+gp3
+125 MB/s
+
+Database
+io2
+High IOPS
+
+Backups
+st1
+Cheap HDD
+
+Easier Expansion : 
+
+Modify Volume
+
+500 GB
+
+↓
+
+1 TB
+-------------------
+Inside Linux.
+lsblk
+
+growpart
+
+resize2fs
+----------------------------------------------------------
+

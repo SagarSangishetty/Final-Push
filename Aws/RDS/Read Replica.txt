@@ -1,0 +1,151 @@
+===========================================
+Read Replica
+===========================================
+
+Purpose
+
+Improve Read Performance.
+
+Read Replica receives data from the Primary database using replication.
+
+It serves only READ requests.
+
+Writes always go to the Primary database.
+
+--------------------------------------------------
+
+Flow
+
+Application
+
+↓
+
+Write
+
+↓
+
+Primary DB
+
+↓
+
+Replication
+
+↓
+
+Read Replica
+
+↓
+
+Read Requests
+
+--------------------------------------------------
+
+Important Points
+
+✔ Read Only
+
+✔ Asynchronous Replication
+
+✔ Improves Read Performance
+
+✔ Can be promoted manually if required
+
+--------------------------------------------------
+
+===========================================
+Multi-AZ
+===========================================
+
+Purpose
+
+High Availability and Automatic Failover.
+
+A standby database is created in another Availability Zone.
+
+Standby does not serve user traffic.
+
+--------------------------------------------------
+
+Flow
+
+Primary DB
+
+↓
+
+Synchronous Replication
+
+↓
+
+Standby DB
+
+↓
+
+Automatic Failover if Primary fails
+
+--------------------------------------------------
+
+Important Points
+
+✔ High Availability
+
+✔ Automatic Failover
+
+✔ Synchronous Replication
+
+✔ Same Endpoint
+
+✔ Standby does not handle user traffic
+
+--------------------------------------------------
+
+Interview Difference
+
+Read Replica
+
+→ Performance
+
+Multi-AZ
+
+→ High Availability
+
+
+------------------------------------------------------
+
+Problem 1
+
+Database is slow because of too many SELECT queries.
+
+Think:
+
+Performance
+
+↓
+
+Read Replica ✅
+Problem 2
+
+Database crashes and business needs minimum downtime.
+
+Think:
+
+High Availability
+
+↓
+
+Multi-AZ ✅
+Problem 3
+
+Database is slow because of too many INSERT/UPDATE queries.
+
+Think:
+
+Read Replica ❌
+
+Because writes always go to the Primary.
+
+Need to:
+
+✔ Optimize Queries
+✔ Increase DB Instance Size
+✔ Partition/Sharding (if required)
+✔ Tune Database

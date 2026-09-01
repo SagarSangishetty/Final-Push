@@ -1,0 +1,71 @@
+Problem 1
+
+Database is slow because of too many SELECT queries.
+
+Think:
+
+Performance
+
+↓
+
+Read Replica ✅
+Problem 2
+
+Database crashes and business needs minimum downtime.
+
+Think:
+
+High Availability
+
+↓
+
+Multi-AZ ✅
+Problem 3
+
+Database is slow because of too many INSERT/UPDATE queries.
+
+Think:
+
+Read Replica ❌
+
+Because writes always go to the Primary.
+
+Need to:
+
+✔ Optimize Queries
+✔ Increase DB Instance Size
+✔ Partition/Sharding (if required)
+✔ Tune Database
+
+----------------------------------------------------------------------
+
+
+Need automatic recovery?
+
+↓
+
+Automated Backup
+
+----------------------------
+
+Need backup before upgrade?
+
+↓
+
+Manual Snapshot
+
+----------------------------
+
+Need to recover deleted data from a specific time?
+
+↓
+
+Point-in-Time Recovery (PITR)
+
+----------------------------
+
+Restore Backup or Snapshot?
+
+↓
+
+Creates a NEW RDS Instance

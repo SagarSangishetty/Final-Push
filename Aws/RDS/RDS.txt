@@ -1,0 +1,130 @@
+===========================================
+Amazon RDS (Relational Database Service)
+===========================================
+
+What is RDS?
+
+Amazon RDS is a managed relational database service.
+
+AWS manages the database infrastructure while the customer manages the database itself.
+
+--------------------------------------------------
+
+Supported Databases
+
+- PostgreSQL
+- MySQL
+- MariaDB
+- Oracle
+- SQL Server
+
+--------------------------------------------------
+
+Responsibilities
+
+Customer
+
+- Create Database
+- Create Users
+- Tables
+- SQL Queries
+- Permissions
+
+AWS
+
+- Database Installation
+- OS Management
+- Automatic Backups
+- Patching
+- Storage Management
+- Replication
+- Monitoring
+- Failover
+
+--------------------------------------------------
+
+Production Architecture
+
+Internet
+
+↓
+
+ALB
+
+↓
+
+EC2
+
+↓
+
+Amazon RDS
+
+Users never connect directly to RDS.
+
+Only the application connects.
+
+--------------------------------------------------
+
+Application Connection
+
+Application
+
+↓
+
+RDS Endpoint
+
+↓
+
+Username
+
+↓
+
+Password
+
+↓
+
+Database
+
+--------------------------------------------------
+
+Security
+
+RDS is usually deployed in private subnets.
+
+Security Groups allow only application servers to access the database.
+
+Example
+
+EC2 SG
+
+↓
+
+Port 5432
+
+↓
+
+RDS SG
+
+--------------------------------------------------
+
+Why use RDS?
+
+✔ Managed Database
+
+✔ Automatic Backup
+
+✔ Automatic Patching
+
+✔ High Availability
+
+✔ Easy Scaling
+
+✔ Monitoring
+
+✔ Failover
+
+--------------------------------------------------
+
+Interview Answer
+
+Amazon RDS is a managed relational database service. AWS manages infrastructure tasks such as installation, backups, patching, storage, monitoring, and failover, while the customer manages the database schema, users, queries, and permissions. Applications connect to RDS using its endpoint, and RDS is typically deployed in private subnets for security.

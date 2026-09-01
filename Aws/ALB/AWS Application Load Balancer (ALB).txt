@@ -1,0 +1,366 @@
+===========================================
+AWS Application Load Balancer (ALB)
+===========================================
+
+What is an ALB?
+---------------
+
+An Application Load Balancer (ALB) distributes incoming HTTP and HTTPS requests across multiple application servers.
+
+It improves:
+
+- High Availability
+- Scalability
+- Fault Tolerance
+
+Think of ALB as a Traffic Manager.
+
+--------------------------------------------------
+
+Why do we use ALB?
+------------------
+
+Without ALB
+
+Users
+   │
+   ▼
+Single EC2
+
+If EC2 fails
+
+↓
+
+Application becomes unavailable.
+
+--------------------------------------------------
+
+With ALB
+
+Users
+      │
+      ▼
+Application Load Balancer
+      │
+      ├─────────────┐
+      ▼             ▼
+EC2-1          EC2-2
+      │             │
+      └──────┬──────┘
+             ▼
+Application remains available.
+
+--------------------------------------------------
+
+Production Flow
+---------------
+
+User
+
+↓
+
+DNS (Route53)
+
+↓
+
+Application Load Balancer
+
+↓
+
+Listener (HTTP/HTTPS)
+
+↓
+
+Listener Rule
+
+↓
+
+Target Group
+
+↓
+
+Healthy EC2 / ECS / EKS Pods
+
+--------------------------------------------------
+
+Main Components
+---------------
+
+1. Listener
+
+A Listener checks incoming requests on a specific port.
+
+Example:
+
+HTTP : 80
+
+HTTPS : 443
+
+--------------------------------------------------
+
+2. Listener Rule
+
+Decides where the request should go.
+
+Example:
+
+/api
+
+↓
+
+API Target Group
+
+/admin
+
+↓
+
+Admin Target Group
+
+/images
+
+↓
+
+Image Service
+
+--------------------------------------------------
+
+3. Target Group
+
+A Target Group contains backend servers.
+
+Example:
+
+Frontend Target Group
+
+↓
+
+EC2-1
+
+EC2-2
+
+EC2-3
+
+--------------------------------------------------
+
+4. Health Check
+
+ALB continuously checks whether backend servers are healthy.
+
+Example:
+
+GET
+
+/health
+
+Healthy
+
+↓
+
+Receive Traffic
+
+Unhealthy
+
+↓
+
+Removed from Load Balancer
+
+--------------------------------------------------
+
+Supported Targets
+-----------------
+
+ALB can send traffic to:
+
+- EC2 Instances
+- ECS Tasks
+- EKS Pods (via AWS Load Balancer Controller)
+- IP Addresses
+- Lambda Functions
+
+--------------------------------------------------
+
+Routing Types
+-------------
+
+1. Path-based Routing
+
+/api
+
+↓
+
+API Server
+
+/images
+
+↓
+
+Image Server
+
+--------------------------------------------------
+
+2. Host-based Routing
+
+api.company.com
+
+↓
+
+API Service
+
+admin.company.com
+
+↓
+
+Admin Service
+
+--------------------------------------------------
+
+3. Header-based Routing
+
+Can route based on HTTP headers.
+
+--------------------------------------------------
+
+Security
+--------
+
+1. Security Groups
+
+Allow:
+
+80
+
+443
+
+Restrict backend traffic.
+
+--------------------------------------------------
+
+2. HTTPS
+
+Uses SSL/TLS Certificate.
+
+Certificates are usually managed using AWS Certificate Manager (ACM).
+
+--------------------------------------------------
+
+3. AWS WAF
+
+Protects against:
+
+SQL Injection
+
+Cross-Site Scripting (XSS)
+
+Bot Traffic
+
+--------------------------------------------------
+
+4. AWS Shield
+
+Protects against DDoS attacks.
+
+--------------------------------------------------
+
+Production Architecture
+-----------------------
+
+Internet
+
+↓
+
+Route53
+
+↓
+
+Application Load Balancer
+
+↓
+
+AWS WAF
+
+↓
+
+Listener (443)
+
+↓
+
+Target Group
+
+↓
+
+EC2 / ECS / EKS
+
+↓
+
+Database
+
+--------------------------------------------------
+
+Production Best Practices
+-------------------------
+
+✔ Deploy ALB in at least 2 Availability Zones
+
+✔ Use HTTPS only
+
+✔ Use ACM certificates
+
+✔ Enable Health Checks
+
+✔ Enable Access Logs
+
+✔ Use Target Groups
+
+✔ Enable Cross-Zone Load Balancing
+
+✔ Protect using AWS WAF
+
+✔ Monitor using CloudWatch
+
+✔ Use Auto Scaling with Target Groups
+
+--------------------------------------------------
+
+CI/CD Flow
+-----------
+
+Developer
+
+↓
+
+GitHub
+
+↓
+
+CI/CD
+
+↓
+
+Docker Image
+
+↓
+
+ECR
+
+↓
+
+Deploy to EKS
+
+↓
+
+Pods Registered
+
+↓
+
+Target Group Updated
+
+↓
+
+ALB Routes Traffic
+
+--------------------------------------------------
+
+Interview Answer
+----------------
+
+An Application Load Balancer distributes HTTP and HTTPS traffic across multiple backend targets such as EC2 instances, ECS tasks, or EKS pods. It uses listeners and listener rules to route requests to target groups based on URL paths, hostnames, or headers. ALB continuously performs health checks and sends traffic only to healthy targets. In production, ALBs are deployed across multiple Availability Zones, secured with HTTPS using ACM certificates, protected by AWS WAF and Shield, integrated with Auto Scaling, and monitored using CloudWatch.

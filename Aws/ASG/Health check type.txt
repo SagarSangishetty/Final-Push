@@ -1,0 +1,6 @@
+ASG has a setting called Health Check Type:
+
+EC2 → ASG only looks at EC2 instance health.
+ELB → ASG also considers the ALB Target Group health.
+
+In production, when an ASG is behind an ALB, companies commonly configure ELB health checks so that an instance with a failed application is automatically replaced, not just removed from traffic.

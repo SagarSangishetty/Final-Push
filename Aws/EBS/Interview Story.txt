@@ -1,0 +1,37 @@
+Interviewer: How is EBS managed in your organization?
+
+Answer:
+
+In our organization, every EC2 instance has at least one EBS volume attached as the root volume for the operating system.
+
+For applications, we usually attach separate EBS volumes instead of storing everything on the root disk.
+
+For example:
+
+EC2
+│
+├── Root EBS (50 GB)
+│      └── Operating System
+│
+├── EBS Volume (100 GB)
+│      └── Application Data
+│
+├── EBS Volume (200 GB)
+│      └── Logs
+│
+└── EBS Volume (500 GB)
+       └── Database/Data Files
+
+This separation makes storage easier to manage.
+
+If logs fill up, only the log volume is affected. The operating system continues running normally.
+
+All production EBS volumes are encrypted using AWS KMS.
+
+Snapshots are scheduled using AWS Backup or Amazon Data Lifecycle Manager (DLM). The first snapshot is a full backup of the used blocks, and later snapshots are incremental.
+
+If a volume is lost or corrupted, we create a new EBS volume from the latest snapshot, attach it to the EC2 instance, and mount it. The application can then continue using the restored data.
+
+When storage starts running low, we increase the EBS volume size from the AWS Console or CLI. After that, we extend the filesystem in Linux using tools like `growpart` and `resize2fs` (or `xfs_growfs` for XFS). No new server is required.
+
+We also monitor disk utilization using CloudWatch metrics and Linux commands such as `df -h`. Alerts are configured so we know before a disk becomes full.

@@ -1,0 +1,62 @@
+========================================================
+
+Route 53 - Latency Routing
+===========================================
+
+What is Latency Routing?
+------------------------
+
+Latency Routing sends users to the AWS Region with the lowest network latency.
+
+It improves user experience.
+
+--------------------------------------------------
+
+Example
+
+User - India
+
+↓
+
+Mumbai Region
+
+----------------------------
+
+User - Germany
+
+↓
+
+Frankfurt Region
+
+----------------------------
+
+User - USA
+
+↓
+
+Virginia Region
+
+--------------------------------------------------
+
+Production Use Cases
+
+✔ Global Applications
+
+✔ Multi-Region Deployment
+
+✔ Lower Response Time
+
+--------------------------------------------------
+
+Important Point
+
+It selects the region with the lowest latency,
+
+NOT the geographically nearest region.
+
+--------------------------------------------------
+
+Interview Answer
+
+Latency Routing directs users to the AWS Region that provides the lowest network latency, improving application performance for globally distributed users.
+

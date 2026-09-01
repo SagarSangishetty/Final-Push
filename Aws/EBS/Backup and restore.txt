@@ -1,0 +1,151 @@
+===========================
+AWS EBS SNAPSHOTS - NOTES
+===========================
+
+What is an EBS Snapshot?
+------------------------
+An EBS Snapshot is a point-in-time backup of an EBS volume.
+
+It is a block-level backup, not a file-level backup.
+
+Flow:
+
+Application
+    ↓
+Filesystem (ext4/xfs)
+    ↓
+EBS Volume (Blocks)
+    ↓
+EBS Snapshot
+
+------------------------------------------------------------
+
+How does the first snapshot work?
+---------------------------------
+
+Suppose:
+
+EBS Volume = 100 GB
+Used Data = 30 GB
+Free Space = 70 GB
+
+First Snapshot:
+- Copies only the 30 GB of used blocks.
+- Empty blocks are NOT backed up.
+
+------------------------------------------------------------
+
+How do subsequent snapshots work?
+---------------------------------
+
+Suppose after the first snapshot:
+
+- Added 5 GB of files
+- Modified 3 GB of data
+- Deleted 2 GB of data
+
+Second Snapshot:
+- Copies ONLY the changed blocks.
+- Unchanged blocks are NOT copied again.
+
+This is called an Incremental Snapshot.
+
+------------------------------------------------------------
+
+Example
+-------
+
+Snapshot 1
+
+A  B  C  D  E
+
+After some changes:
+
+A  B  X  D  E
+
+Snapshot 2 stores only:
+
+X
+
+AWS automatically references:
+
+A
+B
+D
+E
+
+from Snapshot 1.
+
+------------------------------------------------------------
+
+How does restoration work?
+--------------------------
+
+Suppose the EC2 instance crashes.
+
+You restore using Snapshot 2.
+
+AWS automatically reconstructs the complete volume.
+
+Snapshot 2
+     │
+     ▼
+Create New EBS Volume
+     │
+     ▼
+Attach to New EC2
+     │
+     ▼
+Mount
+
+The restored volume contains:
+
+✔ Complete filesystem
+✔ All directories
+✔ All files
+✔ Latest data
+
+Even though Snapshot 2 stored only the changed blocks.
+
+------------------------------------------------------------
+
+Important Point
+---------------
+
+Snapshots are:
+
+✔ Incremental in Storage
+✔ Full during Restore
+
+This means:
+
+Storage Used:
+Snapshot 1 → Full used blocks
+Snapshot 2 → Changed blocks only
+Snapshot 3 → Changed blocks only
+
+Restore:
+Any snapshot can restore the COMPLETE volume.
+
+------------------------------------------------------------
+
+Benefits
+--------
+
+- Saves storage cost
+- Faster backups
+- Disaster Recovery
+- Create new EBS volumes
+- Clone environments
+- Backup before deployments or OS upgrades
+
+------------------------------------------------------------
+
+Interview Answer
+----------------
+
+An EBS Snapshot is a point-in-time, block-level backup of an EBS volume.
+
+The first snapshot copies all used blocks. Subsequent snapshots are incremental and store only the blocks that have changed since the previous snapshot.
+
+Although snapshots are incremental in storage, every snapshot is logically a full backup. When restoring the latest snapshot, AWS automatically reconstructs the complete EBS volume by combining the changed blocks from the latest snapshot with the unchanged blocks referenced from previous snapshots.

@@ -1,0 +1,160 @@
+=========================
+AWS EBS VOLUME TYPES
+=========================
+
+Amazon EBS (Elastic Block Store)
+--------------------------------
+Persistent block storage used with EC2 instances.
+
+Main Categories
+---------------
+1. SSD (High Performance)
+2. HDD (Low Cost)
+
+==========================================================
+1. gp3 (General Purpose SSD) ⭐ Most Common
+==========================================================
+
+Use Cases:
+- Web Servers
+- Application Servers
+- Kubernetes Nodes
+- Docker Hosts
+- Jenkins
+- General Linux Servers
+
+Advantages:
+- Low cost
+- Good performance
+- Independent IOPS & Throughput
+- Recommended for most workloads
+
+Maximum:
+- 16,000 IOPS
+- 1,000 MB/s throughput
+- Up to 64 TB
+
+Production:
+✔ Most commonly used EBS volume.
+
+==========================================================
+2. gp2 (General Purpose SSD)
+==========================================================
+
+Older generation SSD.
+
+Characteristics:
+- Performance depends on volume size.
+- Smaller volumes get fewer IOPS.
+
+Production:
+Mostly replaced by gp3.
+
+==========================================================
+3. io1 (Provisioned IOPS SSD)
+==========================================================
+
+Use Cases:
+- Oracle Database
+- SQL Server
+- High Transaction Systems
+
+Advantages:
+- Very high IOPS
+- Predictable performance
+
+Disadvantages:
+- Expensive
+
+Production:
+Used for legacy enterprise databases.
+
+==========================================================
+4. io2 (Provisioned IOPS SSD)
+==========================================================
+
+Improved version of io1.
+
+Advantages:
+- Higher durability (99.999%)
+- Higher IOPS
+- Better reliability
+- Ideal for mission-critical applications
+
+Use Cases:
+- Banking
+- Financial Applications
+- SAP
+- Enterprise Databases
+
+Production:
+Preferred over io1 for critical workloads.
+
+==========================================================
+5. st1 (Throughput Optimized HDD)
+==========================================================
+
+Magnetic HDD optimized for throughput.
+
+Use Cases:
+- Log Storage
+- Big Data
+- Data Warehouses
+- Streaming
+- Batch Processing
+
+Advantages:
+- Large storage
+- Low cost
+- High throughput
+
+Not suitable for:
+- Databases
+- Boot volumes
+
+==========================================================
+6. sc1 (Cold HDD)
+==========================================================
+
+Lowest-cost EBS storage.
+
+Use Cases:
+- Archive
+- Old Backups
+- Rarely accessed files
+
+Advantages:
+- Cheapest option
+
+Disadvantages:
+- Lowest performance
+
+==========================================================
+Production Example
+==========================================================
+
+EC2 Root Volume
+    gp3
+
+Database Server
+    io2
+
+Application Logs
+    gp3 or st1
+
+Backup Storage
+    st1
+
+Archive Storage
+    sc1
+
+==========================================================
+Interview Tip
+==========================================================
+
+gp3 → Default choice for most EC2 instances.
+gp2 → Older generation, largely replaced by gp3.
+io1 → Legacy high-IOPS SSD.
+io2 → Mission-critical databases requiring high performance.
+st1 → High-throughput HDD for logs and analytics.
+sc1 → Lowest-cost HDD for archives and infrequently accessed data.

@@ -1,0 +1,99 @@
+===========================================
+Amazon Route 53
+===========================================
+
+What is Route 53?
+
+Amazon Route 53 is AWS's managed DNS service.
+
+Its job is to translate domain names into IP addresses or AWS resources.
+
+Example:
+
+www.ecommerce.com
+
+↓
+
+54.86.120.50
+
+--------------------------------------------------
+
+Why do we need Route 53?
+
+People remember names.
+
+Computers communicate using IP addresses.
+
+Route 53 converts:
+
+Domain Name
+
+↓
+
+IP Address
+
+--------------------------------------------------
+
+Simple Flow
+
+User
+
+↓
+
+Browser
+
+↓
+
+DNS Query
+
+↓
+
+Route 53
+
+↓
+
+Returns IP Address
+
+↓
+
+Browser connects to EC2 / ALB
+
+↓
+
+Website Opens
+
+--------------------------------------------------
+
+Important Point
+
+Route 53 only resolves DNS.
+
+It does NOT forward user traffic.
+
+Once the browser gets the IP address,
+
+it connects directly to the destination.
+
+--------------------------------------------------
+
+Production Flow
+
+User
+
+↓
+
+Route 53
+
+↓
+
+Application Load Balancer
+
+↓
+
+EC2 / ECS / EKS
+
+--------------------------------------------------
+
+Interview Answer
+
+Amazon Route 53 is AWS's managed DNS service. It resolves domain names into IP addresses or AWS resources. When a user enters a domain name in the browser, Route 53 returns the corresponding IP address, allowing the browser to connect directly to the application.

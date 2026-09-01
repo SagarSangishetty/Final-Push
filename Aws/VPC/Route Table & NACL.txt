@@ -1,0 +1,183 @@
+===========================================
+AWS Route Table
+===========================================
+
+What is a Route Table?
+----------------------
+
+A Route Table is a set of routing rules that tells AWS where a packet should go based on its destination IP address.
+
+It does NOT allow or deny traffic.
+
+It only decides the next hop.
+
+Think of it as a GPS.
+
+Example:
+
+Destination        Target
+
+10.0.0.0/16   ---> Local
+0.0.0.0/0     ---> Internet Gateway
+172.16.0.0/16 ---> VPC Peering
+
+Meaning:
+
+If destination is inside the VPC
+→ Send Locally
+
+If destination is Internet
+→ Send to Internet Gateway
+
+If destination is another VPC
+→ Send to VPC Peering
+
+--------------------------------------------------
+
+Route Table checks only ONE thing:
+
+Destination IP
+
+It does NOT check:
+
+- Source IP
+- Port Number
+- Protocol
+- Allow or Deny
+
+--------------------------------------------------
+
+Simple Flow
+
+Packet
+   │
+Destination IP
+   │
+Route Table
+   │
+Find Best Matching Route
+   │
+Send to Next Hop
+
+--------------------------------------------------
+
+Interview Answer
+
+A Route Table is a collection of routing rules. AWS checks the destination IP of every packet and forwards it to the appropriate next hop such as Local, Internet Gateway, NAT Gateway, VPC Peering, or Transit Gateway.
+
+========================================================
+
+AWS Network ACL (NACL)
+===========================================
+
+What is NACL?
+-------------
+
+A Network ACL is a firewall that protects an entire subnet.
+
+It controls which traffic is allowed to enter and leave the subnet.
+
+Think of it as the Security Guard at the entrance of a society.
+
+--------------------------------------------------
+
+NACL checks:
+
+✔ Source IP
+✔ Destination IP
+✔ Port Number
+✔ Protocol
+✔ Allow or Deny Rule
+
+--------------------------------------------------
+
+Example
+
+Inbound Rules
+
+Allow
+Port 80
+From Anywhere
+
+Allow
+Port 443
+From Anywhere
+
+Allow
+Port 22
+From Admin IP
+
+Deny
+Everything Else
+
+--------------------------------------------------
+
+Outbound Rules
+
+Allow
+All Traffic
+
+--------------------------------------------------
+
+Important Features
+
+Works at Subnet Level
+
+Stateless
+
+Supports Allow and Deny Rules
+
+Processes Rules in Number Order
+
+Lower Rule Number has Higher Priority
+
+--------------------------------------------------
+
+Packet Flow
+
+Incoming
+
+Internet
+      │
+      ▼
+NACL
+      │
+Allow?
+      │
+      ▼
+Security Group
+      │
+      ▼
+EC2
+
+--------------------------------------------------
+
+Difference Between Route Table and NACL
+
+Route Table
+------------
+Decides WHERE the packet should go.
+
+NACL
+------
+Decides WHETHER the packet is allowed.
+
+--------------------------------------------------
+
+Easy Way to Remember
+
+Route Table
+= GPS
+
+"Where should this packet go?"
+
+NACL
+= Security Guard
+
+"Should this packet be allowed?"
+
+--------------------------------------------------
+
+Interview Answer
+
+A Network ACL is a subnet-level firewall that controls inbound and outbound traffic. It is stateless, supports both allow and deny rules, and evaluates traffic before it reaches the Security Group.

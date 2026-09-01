@@ -1,0 +1,216 @@
+===========================================
+How is EC2 Secured?
+===========================================
+
+Amazon EC2 is secured using multiple layers.
+
+1. Security Groups
+------------------
+
+Acts as a virtual firewall.
+
+Controls inbound and outbound traffic.
+
+Example:
+
+Allow:
+- SSH (22) from Admin IP
+- HTTP (80)
+- HTTPS (443)
+
+Deny:
+- All other traffic (default)
+
+Production:
+SSH is usually restricted to specific IPs or accessed through a Bastion Host or AWS Systems Manager.
+
+--------------------------------------------------
+
+2. Network ACL (NACL)
+---------------------
+
+Works at the subnet level.
+
+Controls traffic entering and leaving the subnet.
+
+Unlike Security Groups:
+
+- Stateless
+- Supports Allow and Deny rules
+
+Used as an additional layer of network security.
+
+--------------------------------------------------
+
+3. IAM Roles
+------------
+
+Never store AWS Access Keys on EC2.
+
+Attach an IAM Role to the EC2 instance.
+
+Example:
+
+Application running on EC2
+
+↓
+
+IAM Role
+
+↓
+
+Access S3
+Access Secrets Manager
+Access CloudWatch
+
+without storing credentials.
+
+--------------------------------------------------
+
+4. EBS Encryption
+-----------------
+
+EC2 data stored on EBS volumes is encrypted.
+
+Uses AWS KMS.
+
+Protects data at rest.
+
+Production:
+Enable encryption for all EBS volumes.
+
+--------------------------------------------------
+
+5. Operating System Security
+----------------------------
+
+Keep OS updated.
+
+Regularly install security patches.
+
+Disable unnecessary services.
+
+Remove unused packages.
+
+Create least-privilege users.
+
+--------------------------------------------------
+
+6. SSH Security
+---------------
+
+Do not allow password authentication.
+
+Use SSH Key Pair authentication.
+
+Restrict SSH access to trusted IP addresses.
+
+Production:
+Use Bastion Host or AWS Systems Manager Session Manager instead of exposing SSH to the Internet.
+
+--------------------------------------------------
+
+7. HTTPS
+---------
+
+Applications should use HTTPS.
+
+Encrypts communication between clients and EC2.
+
+Obtains SSL/TLS certificates using AWS Certificate Manager (for ALB) or other certificate providers.
+
+--------------------------------------------------
+
+8. Monitoring & Logging
+-----------------------
+
+CloudWatch
+
+- CPU
+- Memory (via CloudWatch Agent)
+- Disk Usage
+- Network Usage
+
+CloudTrail
+
+Tracks AWS API actions.
+
+Example:
+
+- Start Instance
+- Stop Instance
+- Modify Security Group
+
+--------------------------------------------------
+
+9. Systems Manager (SSM)
+------------------------
+
+Provides secure remote access.
+
+No need to open SSH Port 22.
+
+Supports:
+
+- Session Manager
+- Patch Manager
+- Run Command
+
+--------------------------------------------------
+
+10. AWS WAF & Shield
+--------------------
+
+Used when EC2 is behind an Application Load Balancer.
+
+AWS WAF
+
+Protects against:
+
+- SQL Injection
+- Cross-Site Scripting (XSS)
+
+AWS Shield
+
+Protects against DDoS attacks.
+
+--------------------------------------------------
+
+11. Backups
+-----------
+
+Use EBS Snapshots or AWS Backup.
+
+Allows recovery if an instance or volume fails.
+
+--------------------------------------------------
+
+Production Security Architecture
+--------------------------------
+
+Internet
+      │
+AWS Shield
+      │
+AWS WAF
+      │
+Application Load Balancer
+      │
+Security Group
+      │
+EC2 Instance
+      │
+IAM Role
+      │
+Encrypted EBS (KMS)
+      │
+CloudWatch + CloudTrail
+      │
+AWS Backup / Snapshots
+
+--------------------------------------------------
+
+Interview Answer
+----------------
+
+EC2 instances are secured using multiple layers. Security Groups act as stateful firewalls, while Network ACLs provide subnet-level security. IAM Roles allow applications to access AWS services without storing credentials. EBS volumes are encrypted using AWS KMS, and operating systems are regularly patched. SSH access is restricted using key pairs, trusted IPs, or AWS Systems Manager. Applications use HTTPS for secure communication, CloudWatch and CloudTrail are used for monitoring and auditing, and backups are maintained using EBS Snapshots or AWS Backup.

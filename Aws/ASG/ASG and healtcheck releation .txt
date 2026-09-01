@@ -1,0 +1,23 @@
+CloudWatch
+        │
+        ▼
+      ASG
+        │
+        ▼
+Launch EC2
+        │
+        ▼
+Register in Target Group
+        │
+        ▼
+ALB Health Check
+        │
+   ┌────┴────┐
+   │         │
+Healthy   Unhealthy
+   │         │
+   ▼         ▼
+Receive    ASG Terminates
+Traffic       │
+              ▼
+        Launch Replacement

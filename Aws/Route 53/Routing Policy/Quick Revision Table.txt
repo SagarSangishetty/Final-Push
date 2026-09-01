@@ -1,0 +1,9 @@
+| Routing Policy   | Production Use                                               |
+| ---------------- | ------------------------------------------------------------ |
+| **Simple**       | One resource (Single ALB/EC2/S3)                             |
+| **Weighted**     | Canary, Blue-Green, A/B Testing                              |
+| **Failover**     | Disaster Recovery (Primary → Secondary)                      |
+| **Latency**      | Send users to the lowest-latency AWS Region                  |
+| **Geolocation**  | Country/continent-based routing                              |
+| **Geoproximity** | Route based on resource location and bias                    |
+| **Multi-Value**  | Return multiple healthy IPs for basic DNS-level distribution |
