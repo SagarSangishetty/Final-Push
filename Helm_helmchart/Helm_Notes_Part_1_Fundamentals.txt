@@ -1,0 +1,169 @@
+HELM NOTES - PART 1
+
+Topic: Helm Fundamentals, Chart Structure, Templates, and Commands
+Level: DevOps interview revision Environment: Windows Git Bash +
+Minikube
+
+1. WHAT IS HELM?
+
+Helm is a package manager for Kubernetes. It helps package, configure,
+install, upgrade, roll back, and manage Kubernetes applications.
+
+Without Helm: - Maintain multiple Kubernetes YAML files manually. -
+Change values in multiple files for different environments. - Manage
+updates and rollbacks manually.
+
+With Helm: - Use reusable templates. - Keep configuration in
+values.yaml. - Install an application as a release. - Upgrade and roll
+back releases.
+
+Key terms: - Chart: The package containing templates and
+configuration. - Release: An installed instance of a chart. -
+Repository: A place where charts can be stored and shared. - Values:
+Configuration passed to chart templates. - Revision: A version of a
+release’s deployment history.
+
+2. CHART STRUCTURE
+
+A chart commonly contains:
+
+mychart/ Chart.yaml values.yaml templates/ deployment.yaml service.yaml
+
+Chart.yaml: - Metadata about the chart. - apiVersion: v2 is used by Helm
+3 charts. - name: Chart name. - description: What the chart does. -
+type: application or library. - version: Version of the chart package. -
+appVersion: Version of the application being packaged.
+
+Important difference: - version changes when the chart itself changes. -
+appVersion describes the application version. It is informational and
+does not automatically set the container image tag.
+
+values.yaml: - Default configuration values used by templates. -
+Examples: replica count, image repository/tag, service type/port.
+
+templates/: - Kubernetes YAML templates containing Go-template
+expressions. - Helm renders these templates into Kubernetes manifests.
+
+3. IMPORTANT TEMPLATE EXPRESSIONS
+
+{{ .Values.replicaCount }} Reads replicaCount from values.yaml.
+
+{{ .Values.image.repository }} Reads the image repository.
+
+{{ .Values.image.tag }} Reads the image tag.
+
+{{ .Release.Name }} Reads the installed release name.
+
+Example: image: “{{ .Values.image.repository }}:{{ .Values.image.tag }}”
+
+If values.yaml contains: image: repository: nginx tag: “1.27”
+
+The rendered image becomes: image: nginx:1.27
+
+If the release is installed as “demo”, {{ .Release.Name }} renders as
+“demo”.
+
+4. CHART VALIDATION AND RENDERING
+
+Run these commands from inside the chart directory:
+
+helm lint . Checks the chart for common errors and best practices.
+
+helm template demo . Renders templates locally as Kubernetes YAML. It
+does not install anything.
+
+helm template demo . –debug Renders templates with additional debugging
+output.
+
+helm show chart . Displays chart metadata.
+
+5. INSTALL AND INSPECT A RELEASE
+
+helm install demo . Installs the chart from the current directory as
+release “demo”.
+
+helm list Lists releases in the current namespace.
+
+helm list -A Lists releases across all namespaces.
+
+helm status demo Shows release status and related information.
+
+helm get values demo Shows user-supplied values for the release.
+
+helm get values demo –all Shows computed values, including chart
+defaults and overrides.
+
+helm get manifest demo Shows the Kubernetes manifests stored for the
+release.
+
+kubectl get deployments kubectl get pods kubectl get services Check
+Kubernetes resources created by the chart.
+
+Important: Helm showing STATUS: deployed does not guarantee that the
+application is healthy or reachable. Always verify Kubernetes resources
+and application behaviour.
+
+6. UPGRADE, HISTORY, AND ROLLBACK
+
+helm upgrade demo . Applies chart changes to an existing release.
+
+helm upgrade demo . –set replicaCount=3 Upgrades the release with three
+replicas.
+
+helm history demo Shows the release revision history.
+
+helm rollback demo 1 Rolls back release “demo” to revision 1.
+
+Important: - A rollback creates a new revision; it does not erase
+history. - Rollback changes the deployed release, not the local chart
+files. - After an upgrade or rollback, verify the Deployment, Pods,
+image, and application. - Use helm history and helm status to confirm
+what happened.
+
+7. VALUES FILES AND PRECEDENCE
+
+Example files: values.yaml values-dev.yaml values-prod.yaml
+
+helm upgrade –install demo . -f values-dev.yaml Installs or upgrades
+using dev overrides.
+
+helm upgrade –install demo . -f values-prod.yaml Installs or upgrades
+using production overrides.
+
+When multiple values sources are supplied, precedence is generally: 1.
+Chart’s values.yaml defaults 2. Values files supplied with -f, with
+later files taking precedence for conflicting keys 3. –set command-line
+overrides
+
+Example: helm upgrade demo . -f values-dev.yaml –set replicaCount=3
+
+The –set value takes precedence over the same key in the values file.
+
+Nested maps merge by key where possible; a later override of one nested
+key does not necessarily replace the entire map.
+
+8. USEFUL INTERVIEW POINTS
+
+Q: What is the difference between a chart and a release? A: A chart is
+the package/template. A release is an installed instance of that chart.
+
+Q: What is the difference between chart version and appVersion? A: Chart
+version versions the chart package. appVersion describes the application
+version.
+
+Q: Does helm template install resources? A: No. It only renders the
+templates locally.
+
+Q: Does STATUS: deployed mean the app is working? A: No. Check
+Deployment readiness, Pod status, Service endpoints, logs, and
+connectivity.
+
+Q: Does helm rollback change the chart files on disk? A: No. It rolls
+the deployed release back to a prior revision.
+
+QUICK COMMAND REVISION
+
+helm lint . helm template demo . helm install demo . helm list helm
+status demo helm get values demo –all helm get manifest demo helm
+upgrade demo . –set replicaCount=3 helm history demo helm rollback demo
+1 kubectl get deploy,pods,svc

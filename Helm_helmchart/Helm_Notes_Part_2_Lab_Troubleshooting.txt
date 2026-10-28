@@ -1,0 +1,186 @@
+HELM NOTES - PART 2
+
+Topic: Custom Chart Hands-on Lab and Troubleshooting Environment:
+Windows Git Bash + Minikube
+
+1. CUSTOM CHART CREATED
+
+Working directory used in the lab: chart/
+
+Structure: chart/ Chart.yaml values.yaml templates/ deployment.yaml
+service.yaml
+
+Chart.yaml: apiVersion: v2 name: mychart description: My first custom
+Helm chart type: application version: 0.1.0 appVersion: “1.27”
+
+values.yaml: replicaCount: 2 image: repository: nginx tag: “1.27”
+service: type: ClusterIP port: 80
+
+templates/deployment.yaml: apiVersion: apps/v1 kind: Deployment
+metadata: name: {{ .Release.Name }} spec: replicas: {{
+.Values.replicaCount }} selector: matchLabels: app: {{ .Release.Name }}
+template: metadata: labels: app: {{ .Release.Name }} spec: containers: -
+name: nginx image: “{{ .Values.image.repository }}:{{ .Values.image.tag
+}}” ports: - containerPort: 80
+
+templates/service.yaml: apiVersion: v1 kind: Service metadata: name: {{
+.Release.Name }} spec: type: {{ .Values.service.type }} selector: app:
+{{ .Release.Name }} ports: - port: {{ .Values.service.port }}
+targetPort: 80
+
+2. VALIDATE AND INSTALL THE CUSTOM CHART
+
+Run these commands from inside chart/:
+
+helm lint . helm template demo . helm install demo .
+
+The chart was validated and rendered successfully, then installed as
+release “demo”.
+
+The chart uses the release name in both the Deployment and Service
+names/labels. Therefore, for release “demo”, the matching label is
+app=demo.
+
+3. RELEASES IN THE LAB
+
+There are two separate releases from earlier practice: - myapp: an
+earlier release, separate from the custom chart release. - demo: the
+custom chart release.
+
+Do not assume these releases are the same application or share the same
+configuration.
+
+The demo release was upgraded with: helm upgrade demo . –set
+replicaCount=3
+
+Observed result: - Release revision became 2. - Helm status was
+deployed. - Deployment had 3 desired/ready replicas. - Three Pods were
+running. - The rendered container image was nginx:1.27. - Service type
+was ClusterIP and service port was 80.
+
+Verify current state rather than relying on old lab output: helm status
+demo helm history demo kubectl get deployment demo kubectl get pods
+kubectl get svc demo
+
+4. ACCESSING THE SERVICE
+
+The chart’s Service is ClusterIP, which is accessible inside the cluster
+by default.
+
+For local access through Minikube: kubectl port-forward svc/demo 8080:80
+
+Then open this address in a browser: http://localhost:8080
+
+Keep the port-forward command running in that terminal while testing.
+
+5. TROUBLESHOOTING: SERVICE HAS NO ENDPOINTS
+
+Scenario: - Helm release is deployed. - Pods appear Running/Ready. -
+Service exists. - kubectl get endpoints demo shows no endpoints.
+
+First checks: kubectl describe svc demo kubectl get pods –show-labels
+kubectl get endpoints demo kubectl get endpointslices -l
+kubernetes.io/service-name=demo
+
+Compare: - Service selector - Pod labels
+
+In this chart, both should match app=demo for release “demo”.
+
+Why this matters: A Service routes traffic to matching Pods. If the
+selector does not match Pod labels, the Service may have zero endpoints
+even when the Pods are running.
+
+If labels match but endpoints are still empty, check Pod readiness,
+namespace, and EndpointSlice details.
+
+Do not immediately roll back or restart Minikube before checking the
+selector and labels.
+
+6. TROUBLESHOOTING: UPGRADE SUCCEEDS BUT OLD IMAGE IS RUNNING
+
+Scenario: Helm upgrade reports success, but the application seems to be
+running an old image.
+
+Step 1: Check the image configured in the Deployment: kubectl get
+deployment demo -o=jsonpath=‘{.spec.template.spec.containers[*].image}’
+
+Step 2: Check the release’s computed values: helm get values demo –all
+
+Step 3: Check the manifest stored for the release: helm get manifest
+demo
+
+Step 4: Check the actual Pods: kubectl get pods kubectl describe pod
+
+Check the following: - Did the intended image tag get set in
+values.yaml, a values file, or –set? - Did you run helm upgrade against
+the correct release and chart directory? - Does
+templates/deployment.yaml actually use .Values.image.repository and
+.Values.image.tag? - Does the Deployment show the expected image? - Were
+the old Pods replaced and the new Pods become Ready? - Is the
+application or browser showing cached content even though the image
+changed?
+
+If the Deployment image itself is old, investigate the values and
+rendered/stored manifest first. If the Deployment image is new but a Pod
+is old, inspect the Pod and rollout status: kubectl rollout status
+deployment/demo kubectl describe deployment demo kubectl get pods -o
+wide
+
+Good practice: Use unique image tags for each build rather than
+repeatedly pushing different content under the same tag. This makes
+deployments and rollbacks easier to track.
+
+7. GENERAL HELM TROUBLESHOOTING FLOW
+
+1.  Check Helm: helm status demo helm history demo
+
+2.  Check Kubernetes resources: kubectl get deploy,pods,svc
+
+3.  Inspect details: kubectl describe deployment demo kubectl describe
+    svc demo kubectl describe pod
+
+4.  Inspect configuration and rendered resources: helm get values demo
+    –all helm get manifest demo
+
+5.  Check logs when the application or container is failing: kubectl
+    logs kubectl logs –previous
+
+6.  Make the smallest justified fix, then upgrade: helm upgrade demo .
+    [appropriate values/overrides]
+
+7.  Verify after the change: helm status demo kubectl rollout status
+    deployment/demo kubectl get pods,svc,endpoints
+
+Use the actual release name, namespace, chart directory, and container
+name for your environment.
+
+8. INTERVIEW TROUBLESHOOTING CHEAT SHEET
+
+Problem: Service has no endpoints. First check: Service selector versus
+Pod labels; then readiness and namespace.
+
+Problem: Helm says deployed, but Pods are failing. Check: kubectl get
+pods, kubectl describe pod, kubectl logs, Deployment events.
+
+Problem: New values did not take effect. Check: correct release/chart
+path, -f order, –set precedence, helm get values –all, helm get
+manifest.
+
+Problem: Wrong image version. Check: Deployment image, Helm values,
+rendered/stored manifest, actual Pods, rollout status.
+
+Problem: Need to undo a bad release upgrade. Check: helm history demo,
+then use helm rollback demo if rollback is appropriate.
+
+Problem: Application is not reachable. Check: Pod readiness, Service
+selector/endpoints, service port and targetPort, then port-forward or
+Ingress/networking as applicable.
+
+9. LESSON 10 CHECKPOINT
+
+Question: Release is deployed, Pods are Running/Ready, Service exists,
+but endpoints are empty. What do you check first?
+
+Correct answer: Compare the Service selector with the Pod labels.
+
+Reason: The Service only selects Pods whose labels match its selector.
